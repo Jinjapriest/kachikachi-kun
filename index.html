@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>カチカチくん 設定推測</title>
 <meta name="theme-color" content="#d4173a">
 <link rel="manifest" href="manifest.webmanifest">
@@ -23,6 +23,7 @@
 :root[data-theme=light]{color-scheme:light}
 :root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
+html,body,button,input,select,textarea,label,a{touch-action:manipulation}
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font:16px/1.4 "Zen Kaku Gothic New",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
 .num{font-family:"Barlow Condensed","Zen Kaku Gothic New",sans-serif;font-variant-numeric:tabular-nums}
@@ -322,6 +323,8 @@ const showIn=view==='count'||view==='lamp';document.querySelector('.inputs').sty
 document.body.classList.toggle('minus-on',minus);$('minus').classList.toggle('on',minus);$('minus').setAttribute('aria-pressed',minus);
 persist()}
 const ch=f=>{push();f();S().sample=false;render()};
+let lastT=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastT<350&&!e.target.closest('input,select,textarea,label')){e.preventDefault();const b=e.target.closest('button');if(b)b.click()}lastT=n},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
 $('pad').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;const it=items().find(x=>x.id===b.dataset.id);if(!it)return;const d=minus?-1:1;ch(()=>{const s=S();s.cnt=s.cnt||{};if(it.r==='free'){const v=(s.cnt[it.id]||0)+d;if(v<0)return;s.cnt[it.id]=v;return}if(s[it.r]+d<0)return;s[it.r]+=d;const link=LINK[it.r];if(link)s[link]=Math.max(0,s[link]+d)});try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}});
 $('modes').addEventListener('click',e=>{const b=e.target.closest('[data-md]');if(!b)return;const k=b.dataset.md;if(k==='c'&&mode()!=='c'){const t=curT();store.items=TPL[t==='c'?mdl().f:t].map(x=>Object.assign({id:x.r},x));store.lamp=t==='h'}store.mode=k;render();toast(k==='c'?'カスタムモード':'テンプレを切り替えました')});
 $('itemEd').addEventListener('change',e=>{const t=e.target;if(t.id==='lampChk'){store.lamp=t.checked;render();return}const row=t.closest('[data-row]');if(!row||!t.dataset.f)return;const it=store.items[+row.dataset.row];if(t.dataset.f==='r'){const old=it.r;it.r=t.value;if(t.value!=='free'){it.id=t.value}else if(old!=='free'){it.id='f'+Date.now()}if(!it.l||it.l===(ROLE[old]||'').replace(/（.*/,''))it.l=ROLE[t.value].replace(/（.*/,'')}else it[t.dataset.f]=t.value;render()});
