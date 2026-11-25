@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>カチカチくん 設定推測</title>
 <meta name="theme-color" content="#d4173a">
 <link rel="manifest" href="manifest.webmanifest">
@@ -27,8 +27,9 @@ html,body,button,input,select,textarea,label,a{touch-action:manipulation}
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font:16px/1.4 "Zen Kaku Gothic New",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
 .num{font-family:"Barlow Condensed","Zen Kaku Gothic New",sans-serif;font-variant-numeric:tabular-nums}
-.app{height:100%;max-width:640px;margin:0 auto;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
-.res{background:var(--red);color:var(--on);padding:8px 12px 8px;flex:none}
+.app{height:100%;max-width:640px;margin:0 auto;display:flex;flex-direction:column;padding-bottom:max(14px,env(safe-area-inset-bottom,0px));padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+html,body{overscroll-behavior:none}
+.res{background:var(--red);color:var(--on);padding:max(8px,env(safe-area-inset-top,0px)) 12px 8px;flex:none}
 .row2{display:grid;grid-template-columns:minmax(0,1fr) 5em 44px;gap:6px}
 .row2 button{min-height:40px;background:var(--yel);color:#16110f;border:0;font-size:22px;font-weight:900;padding:0}
 .sheet{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;flex-direction:column}
@@ -78,10 +79,11 @@ button{font:inherit;font-size:14px;min-height:42px;border-radius:10px;border:1px
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
 button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .minus-on .pad button.k,.minus-on .chips button{box-shadow:inset 0 0 0 3px var(--red)}
-.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 12px 0;flex:none}
+.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 12px 4px;flex:none}
+.tools button{min-height:48px}
 .tools button{padding:0 2px;white-space:nowrap}
 .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);border-top:1px solid var(--line);margin-top:8px;flex:none}
-.tabs button{border:0;border-radius:0;background:none;min-height:48px;font-size:13px;padding:0 2px;font-weight:700;color:var(--sub);border-top:3px solid transparent}
+.tabs button{border:0;border-radius:0;background:none;min-height:54px;font-size:14px;padding:0 2px;font-weight:700;color:var(--sub);border-top:3px solid transparent}
 .tabs button.act{color:var(--red);border-top-color:var(--red)}
 .chipbox{flex:1;display:flex;flex-direction:column;justify-content:space-around}
 .chips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:4px 0 8px}
