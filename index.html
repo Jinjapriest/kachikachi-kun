@@ -82,6 +82,10 @@ button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 12px 4px;flex:none}
 .tools button{min-height:48px}
 .tools button{padding:0 2px;white-space:nowrap}
+.seg{display:none;grid-template-columns:1fr 1fr;gap:0;margin:8px 12px 0;border:2px solid var(--red);border-radius:12px;overflow:hidden;flex:none}
+.seg.show{display:grid}
+.seg button{border:0;border-radius:0;min-height:48px;font-size:16px;font-weight:700;background:var(--bg);color:var(--red)}
+.seg button.act{background:var(--red);color:#fff}
 .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);border-top:1px solid var(--line);margin-top:8px;flex:none}
 .tabs button{border:0;border-radius:0;background:none;min-height:54px;font-size:14px;padding:0 2px;font-weight:700;color:var(--sub);border-top:3px solid transparent}
 .tabs button.act{color:var(--red);border-top-color:var(--red)}
@@ -142,6 +146,7 @@ td.hit{background:color-mix(in srgb,var(--yel) 40%,transparent);font-weight:700}
 <label>REG<input id="reg" class="num" type="number" inputmode="numeric" min="0"></label>
 <label>開始G<input id="g0" class="num" type="number" inputmode="numeric" min="0"></label>
 </div>
+<div class="seg" id="seg"><button data-v="count">カウント</button><button data-v="lamp">ランプ</button></div>
 <div class="view act" id="v-count"><div class="pad" id="pad"></div></div>
 <div class="view sc" id="v-lamp"><div class="chipbox" id="lamps"></div></div>
 <div class="view sc" id="v-stat">
@@ -318,8 +323,9 @@ $('delModel').hidden=!m.custom;
 $('specNote').textContent=(m.note?m.note+'。':'')+(m.f===H?'ハナハナの小役は設定別数値が公表されていないため空欄。分かる数値を入れると推測に加わります。BIG中スイカは「BIG中1Gあたり」、BIG1回='+sp.gpb+'Gで換算。':'空欄にした小役は推測に使いません。')+' 事前配分はホールの設定配分の想定（初期値は均等）。';
 $('hist').innerHTML=store.hist.length?store.hist.map((h,i)=>{const hm=all.find(x=>x.id===h.s.model)||M[0];return`<li><span><b>${esc(h.s.tag||'台番号なし')}</b> ${esc(hm.n)}<br><small class="num">${new Date(h.t).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}　${h.s.g}G　BIG${h.s.big} REG${h.s.reg}</small></span><span><button data-h="${i}">開く</button> <button data-d="${i}">削除</button></span></li>`}).join(''):'<li class="muted">まだありません。「記録に保存」で台ごとに残せます。</li>';
 if(!lampOn()&&view==='lamp')view='count';
-const T=[['count','カウント'],...(lampOn()?[['lamp','ランプ']]:[]),['stat','判別'],['items','項目'],['spec','数値'],['hist','記録']];
-$('tabs').innerHTML=T.map(([k,l])=>`<button data-v="${k}" class="${k===view?'act':''}">${l}</button>`).join('');
+const T=[['count','カウント'],['stat','判別'],['items','項目'],['spec','数値'],['hist','記録']];
+$('seg').classList.toggle('show',lampOn()&&(view==='count'||view==='lamp'));for(const b of $('seg').children)b.classList.toggle('act',b.dataset.v===view);
+$('tabs').innerHTML=T.map(([k,l])=>`<button data-v="${k}" class="${k===view||(k==='count'&&view==='lamp')?'act':''}">${l}</button>`).join('');
 for(const v of['count','lamp','stat','items','spec','hist'])$('v-'+v).classList.toggle('act',v===view);
 const showIn=view==='count'||view==='lamp';document.querySelector('.inputs').style.display=showIn?'':'none';
 document.body.classList.toggle('minus-on',minus);$('minus').classList.toggle('on',minus);$('minus').setAttribute('aria-pressed',minus);
@@ -389,6 +395,7 @@ $('nAsk').addEventListener('click',()=>aiRead(false));
 if(!window.claude?.use){$('nAsk').hidden=true;$('nMsg').textContent='解析サイト（ちょんぼりすた、1geki、パチ7など）の表をコピーして貼り付けると、「設定1 1/273.1 1/409.6 …」の形の行からBIG・REG・機械割を読み取ります。読み取った後に小役の数値も手入力できます。'}
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 $('delModel').addEventListener('click',e=>{const b=e.currentTarget,m=mdl();if(!m.custom)return;if(!b.dataset.ok){b.dataset.ok=1;b.textContent='もう一度押すと削除';setTimeout(()=>{delete b.dataset.ok;b.textContent='この追加機種を削除'},2500);return}delete b.dataset.ok;b.textContent='この追加機種を削除';store.custom=store.custom.filter(c=>c.id!==m.id);delete store.ov[m.id];ch(()=>{S().model=M[0].id});toast('削除しました')});
+$('seg').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){view=b.dataset.v;render()}});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){view=b.dataset.v;render()}});
 render();
 }
