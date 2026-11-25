@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カチカチくん 設定推測</title>
+<meta name="theme-color" content="#d4173a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<style>
+/* VOICE everyday tool for the hall floor: quick, legible, thumb-sized
+   IDEA the cabinet's data panel: a lit header strip in the machine's own red, counters like hardware buttons
+   PICTURE live posterior bars per setting, drawn large inside the red strip, redrawn on every tap
+   COLOUR hibiscus red field, white ground, palm green support, lamp-yellow accent on the leading setting
+   TYPE Zen Kaku Gothic New for text, Barlow Condensed for every number
+   LAYOUT one screen, no page scroll: red result strip, data inputs, counter pad filling the rest, tool row, bottom tabs */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121413);--ink:light-dark(#16110f,#f2efe9);--sub:light-dark(#6a625d,#a9a39b);--line:light-dark(#e6e1dc,#2c302d);--card:light-dark(#f6f3ef,#1b1e1c);--red:light-dark(#d4173a,#a8132f);--red2:light-dark(#b40f2e,#7e0c22);--green:light-dark(#0c6b49,#3fb886);--yel:#ffd21f;--on:#fff}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 "Zen Kaku Gothic New",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.num{font-family:"Barlow Condensed","Zen Kaku Gothic New",sans-serif;font-variant-numeric:tabular-nums}
+.app{height:100%;max-width:640px;margin:0 auto;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.res{background:var(--red);color:var(--on);padding:8px 12px 8px;flex:none}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) 5em 44px;gap:6px}
+.row2 button{min-height:40px;background:var(--yel);color:#16110f;border:0;font-size:22px;font-weight:900;padding:0}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;flex-direction:column}
+.sheet.open{display:flex}
+.sheet header{background:var(--red);color:#fff;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sheet header b{font-size:18px}
+.sheet header button{background:var(--red2);color:#fff;border:0}
+.sbody{flex:1;overflow:auto;padding:12px;max-width:640px;width:100%;margin:0 auto}
+.sbody label{display:block;font-size:14px;font-weight:700;color:var(--sub);margin-bottom:10px}
+.sbody input,.sbody select,.sbody textarea{display:block;width:100%;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--ink);margin-top:4px}
+.sbody textarea{min-height:110px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.prim{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
+.msg{font-size:14px;padding:8px 10px;border-radius:10px;background:var(--card);margin:8px 0}
+.msg.warn{background:color-mix(in srgb,var(--yel) 35%,var(--bg))}
+.res select,.res input{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:0;border-radius:9px;padding:6px 8px;min-height:40px;width:100%}
+.mid{display:grid;grid-template-columns:minmax(0,1fr) 7.2em;gap:10px;align-items:end;margin-top:6px}
+.bars{display:grid;gap:4px;height:clamp(70px,13vh,130px);align-items:end}
+.bar{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.bar i{display:block;width:100%;background:color-mix(in srgb,#fff 80%,transparent);border-radius:5px 5px 2px 2px;transition:height .25s ease}
+.bar.top i{background:var(--yel)}
+.bar b{font-size:15px;line-height:1;margin-bottom:2px;white-space:nowrap}
+.bar span{font-size:13px;margin-top:3px;font-weight:700;line-height:1}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}}
+.figs{display:grid;gap:4px}
+.figs div{background:var(--red2);border-radius:8px;padding:3px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:4px}
+.figs small{font-size:13px;opacity:.9;white-space:nowrap}
+.figs strong{font-size:22px;line-height:1.15;white-space:nowrap}
+.note{font-size:13px;opacity:.92;margin:5px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px 12px 0;flex:none}
+.inputs label{display:block;font-size:13px;font-weight:700;color:var(--sub);line-height:1.2}
+.inputs input{width:100%;font-size:20px;min-height:40px;border:1px solid var(--line);border-radius:9px;padding:4px 8px;background:var(--bg);color:var(--ink)}
+.view{flex:1 1 0;min-height:0;padding:8px 12px;display:none}
+.view.act{display:flex;flex-direction:column}
+.view.sc{overflow:auto}
+.pad{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:8px}
+.k{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:8px 10px;text-align:left;border-radius:14px;user-select:none;min-height:0;height:100%}
+.k:active{transform:translateY(2px)}
+.k em{font-style:normal;font-size:14px;font-weight:700;line-height:1.2}
+.k .num{font-size:clamp(28px,6vh,48px);line-height:1;align-self:flex-end}
+.k.bb{background:var(--red);color:var(--on);border-color:var(--red)}
+.k.rb{background:var(--green);color:#fff;border-color:var(--green)}
+.k.gr{background:color-mix(in srgb,var(--green) 14%,var(--bg))}
+button{font:inherit;font-size:14px;min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 8px;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.minus-on .pad button.k,.minus-on .chips button{box-shadow:inset 0 0 0 3px var(--red)}
+.tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 12px 0;flex:none}
+.tools button{padding:0 2px;white-space:nowrap}
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);border-top:1px solid var(--line);margin-top:8px;flex:none}
+.tabs button{border:0;border-radius:0;background:none;min-height:48px;font-weight:700;color:var(--sub);border-top:3px solid transparent}
+.tabs button.act{color:var(--red);border-top-color:var(--red)}
+.chipbox{flex:1;display:flex;flex-direction:column;justify-content:space-around}
+.chips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:4px 0 8px}
+.chips button{padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64px;font-size:14px}
+.chips .num{font-size:26px;line-height:1}
+.c0{border-bottom:5px solid #2f6fe0!important}.c1{border-bottom:5px solid #f2c200!important}.c2{border-bottom:5px solid #20a35a!important}.c3{border-bottom:5px solid #e0243c!important}.c4{border-bottom:5px solid transparent!important;border-image:linear-gradient(90deg,#e0243c,#f2c200,#20a35a,#2f6fe0,#9b4be0) 1!important}
+.lbl{font-size:14px;font-weight:700;color:var(--sub)}
+h3{font-size:16px;margin:4px 0 6px}
+.cf{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:13px;color:var(--sub);font-weight:700}
+td.hit{background:color-mix(in srgb,var(--yel) 40%,transparent);font-weight:700}
+.ed td{padding:3px 2px}.ed input{width:100%;font-size:16px;min-height:38px;text-align:right;padding:4px;min-width:4.2em;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.hist ul{list-style:none;margin:0;padding:0}
+.hist li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.hist small{color:var(--sub)}
+.muted{color:var(--sub);font-size:13px}
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<section class="res">
+<div class="row2">
+<select id="model" aria-label="機種"></select>
+<input id="tag" placeholder="台番号" inputmode="numeric" aria-label="台番号">
+<button id="addBtn" aria-label="機種を追加">＋</button>
+</div>
+<div class="mid">
+<div class="bars" id="bars"></div>
+<div class="figs">
+<div><small>最有力</small><strong class="num" id="fTop">-</strong></div>
+<div><small id="fHiL">4以上</small><strong class="num" id="fHi">-</strong></div>
+<div><small>機械割</small><strong class="num" id="fRate">-</strong></div>
+</div>
+</div>
+<p class="note" id="basis"></p>
+</section>
+<div class="inputs">
+<label>総G<input id="g" class="num" type="number" inputmode="numeric" min="0"></label>
+<label>BIG<input id="big" class="num" type="number" inputmode="numeric" min="0"></label>
+<label>REG<input id="reg" class="num" type="number" inputmode="numeric" min="0"></label>
+<label>開始G<input id="g0" class="num" type="number" inputmode="numeric" min="0"></label>
+</div>
+<div class="view act" id="v-count"><div class="pad" id="pad"></div></div>
+<div class="view" id="v-lamp"><div class="chipbox" id="lamps"></div></div>
+<div class="view sc" id="v-stat">
+<h3>確定演出で絞り込み</h3><div class="cf" id="conf"></div>
+<h3>実測と設定差</h3><div class="scroll"><table id="stat"></table></div>
+<p class="muted" id="ownG"></p>
+</div>
+<div class="view sc" id="v-spec">
+<p class="muted" id="specNote" style="margin-top:0"></p>
+<div class="scroll"><table class="ed" id="spec"></table></div>
+<p><button id="specReset">この機種の数値を初期値に戻す</button> <button id="delModel" hidden>この追加機種を削除</button></p>
+<p class="muted">数値は解析サイトの公表値・調査値（ガリぞう氏調べ等）。小役は推定値を含むため目安です。</p>
+</div>
+<div class="view sc hist" id="v-hist">
+<p style="margin-top:0"><button id="copy">今の結果をコピー</button></p>
+<ul id="hist"></ul>
+</div>
+<div class="tools">
+<button id="minus" aria-pressed="false">−モード</button>
+<button id="undo">戻す</button>
+<button id="startNow">開始=今</button>
+<button id="save">保存</button>
+<button id="reset">新しい台</button>
+</div>
+<nav class="tabs" id="tabs"></nav>
+</div>
+<div class="sheet" id="sheet" role="dialog" aria-label="機種を追加">
+<header><b>機種を追加</b><button id="shClose">閉じる</button></header>
+<div class="sbody">
+<div class="grid2">
+<label>機種名<input id="nName" placeholder="例：スマスロ ハナハナ"></label>
+<label>タイプ<select id="nFam"><option value="j">ジャグラー系</option><option value="h">ハナハナ系</option></select></label>
+</div>
+<label>解析サイトの表を貼り付け（推奨）<textarea id="nPaste" placeholder="解析サイトのボーナス確率・ブドウ確率などの表をコピーして貼り付け"></textarea></label>
+<div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap"><button class="prim" id="nRead">貼り付けから読み取る</button><button id="nAsk">機種名からAIで調べる</button></div>
+<div class="msg" id="nMsg">解析サイト（ちょんぼりすた、1geki、パチ7など）の表を貼り付けると、その数字をそのまま読み取ります。貼り付けなしで「機種名からAIで調べる」も使えますが、AIの知識（2026年6月まで）による推定なので、必ず数字を確かめてください。</div>
+<div id="nPrev"></div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+{
+const J='j',H='h',S6=['1','2','3','4','5','6'];
+const aim={big:[273.07,269.70,269.70,259.04,259.04,255.00],reg:[439.84,399.61,330.99,315.08,255.00,255.00],rate:[97.0,98.0,99.5,101.1,103.3,105.5],grape:[6.02,6.02,6.02,6.02,6.02,5.78],sreg:[630.15,574.88,474.90,448.88,364.09,364.09],creg:[1456.36,1310.72,1092.27,1057.03,851.12,851.12]};
+const myj={big:[273.07,270.81,266.41,254.02,240.06,229.15],reg:[409.60,385.51,336.08,289.98,268.59,229.15],rate:[97.0,98.0,99.9,102.8,105.3,109.4],grape:[5.90,5.85,5.80,5.78,5.76,5.66],cherry:[38.10,38.10,36.82,35.62,35.62,35.62],sreg:[655.36,601.25,492.75,407.06,390.10,327.68],creg:[1092.27,1074.36,1057.03,1008.25,862.32,762.05]};
+const M=[
+{id:'myj6',f:J,n:'マイジャグラーⅥ',...myj,note:'BIG/REGはマイジャグラーVと同一。小役・単独REGはV の調査値を流用'},
+{id:'neoaim',f:J,n:'ネオアイムジャグラーEX',...aim,note:'ボーナス確率は6号機アイムと同一。ブドウ・単独REGはSアイムの調査値を流用'},
+{id:'myj5',f:J,n:'マイジャグラーV',...myj},
+{id:'aim',f:J,n:'アイムジャグラーEX（6号機）',...aim},
+{id:'funky2',f:J,n:'ファンキージャグラー2',big:[266.41,259.04,256.00,249.19,240.06,219.92],reg:[439.84,407.06,366.12,322.84,299.25,262.14],rate:[97.0,98.5,99.8,102.0,104.3,109.0],grape:[5.94,5.92,5.88,5.83,5.76,5.67],sreg:[636.27,574.88,512.00,448.88,409.60,356.17],creg:[1424.70,1394.38,1285.02,1149.75,1110.78,992.97]},
+{id:'gogo3',f:J,n:'ゴーゴージャグラー3',big:[259.04,258.02,257.00,254.02,247.31,234.90],reg:[354.25,332.67,306.24,268.59,247.31,234.90],rate:[97.2,98.2,99.4,101.6,103.8,106.5],grape:[6.25,6.20,6.15,6.07,6.00,5.92]},
+{id:'happy8',f:J,n:'ハッピージャグラーVⅢ',big:[273.07,270.81,263.20,254.02,239.18,225.99],reg:[397.19,362.08,332.67,300.62,273.07,256.00],grape:[6.04,6.01,5.98,5.84,5.81,5.79],cherry:[62.24,62.47,62.95,64.00,64.57,65.34],sreg:[636.27,569.88,532.81,478.36,436.91,425.56],creg:[1057.03,992.97,885.62,809.09,728.18,642.51]},
+{id:'girls',f:J,n:'ジャグラーガールズSS',big:[273.07,270.81,260.06,250.14,243.63,225.99],reg:[381.02,350.46,316.60,281.27,270.81,252.06],rate:[97.0,97.9,99.9,102.1,104.0,107.5],grape:[5.98,5.98,5.98,5.98,5.88,5.83]},
+{id:'mister',f:J,n:'ミスタージャグラー',big:[268.6,267.5,260.1,249.2,240.9,237.4],reg:[374.5,354.2,331.0,291.3,257.0,237.4],grape:[6.29,6.22,6.15,6.09,6.02,5.96]},
+{id:'ultra',f:J,n:'ウルトラミラクルジャグラー',big:[267.49,261.10,256.00,242.73,233.22,216.29],reg:[425.56,402.06,350.46,322.84,297.89,277.69],rate:[97.0,98.1,99.8,102.1,104.5,108.1],note:'ブドウ確率の設定別数値は未判明。分かれば下で入力してください'},
+{id:'houou',f:H,n:'ハナハナホウオウ～天翔～（25/30）',big:[297,284,273,262,249,236],reg:[496,458,425,397,366,337],rate:[97,99,101,103,106,109],note:'サイドランプの奇数/偶数示唆は25φと30φで逆になるとの情報あり'},
+{id:'king30',f:H,n:'キングハナハナ-30',big:[292,280,268,257,244,232],reg:[489,452,420,390,360,332],rate:[97,99,101,104,107,110]},
+{id:'dragon',f:H,n:'ドラゴンハナハナ～閃光～',big:[256,246,235,224,212,199],reg:[642,585,537,489,442,399],rate:[97,99,101,104,107,110],note:'30φ・25φ・スマスロ共通スペック'},
+{id:'nkv',f:H,n:'ニューキングハナハナV',sets:['1','2','3','4','V'],big:[299,291,281,268,253],reg:[496,471,442,409,372],rate:[97,99,101,104,108],note:'設定は1・2・3・4・Vの5段階（30φ/スマスロ）'}
+];
+M.forEach(m=>{m.sets=m.sets||S6});
+const AM=()=>M.concat((store.custom||[]).map(c=>Object.assign({sets:S6,custom:true},c)));
+const FAM={j:'ジャグラー',h:'ハナハナ'};
+const SMALL={j:[['grape','ブドウ'],['cherry','チェリー']],h:[['bell','ベル'],['suika','BIG中スイカ']]};
+const COL=['青','黄','緑','赤','虹'];
+const KEY='kachikachi-v1';
+const $=id=>document.getElementById(id);
+const blank=id=>({model:id,tag:'',g:0,big:0,reg:0,g0:0,sb:0,cb:0,sr:0,cr:0,grape:0,cherry:0,bell:0,suika:0,obig:0,oreg:0,side:[0,0,0,0,0],fb:[0,0,0,0,0],fr:[0,0,0,0,0],conf:0});
+const sample=()=>Object.assign(blank('myj6'),{tag:'(例)',g:3240,big:14,reg:13,g0:1180,sb:4,cb:2,sr:3,cr:2,grape:352,cherry:56,sample:true});
+let store={cur:sample(),ov:{},hist:[]};
+let undo=[],minus=false,view='count';
+try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);if(p&&p.cur)store=Object.assign(store,p)}}catch(e){}
+const hd=window.claude?.hot?.data;if(hd&&hd.cur)store=hd;
+window.claude?.hot?.snapshot?.(()=>store);
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+const S=()=>store.cur;
+const mdl=()=>AM().find(m=>m.id===S().model)||M[0];
+const push=()=>{undo.push(JSON.stringify(store.cur));if(undo.length>120)undo.shift()};
+const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1500)};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const ownG=()=>Math.max(0,(S().g||0)-(S().g0||0));
+const spec=m=>{const o=store.ov[m.id]||{};const pick=k=>{const a=o[k]!==undefined?o[k]:m[k];return a&&a.some(v=>v>0)?a:null};return{grape:pick('grape'),cherry:pick('cherry'),bell:pick('bell'),suika:pick('suika'),prior:o.prior||m.sets.map(()=>100/m.sets.length),gpb:o.gpb||24}};
+const ll=(k,n,den)=>{if(!(den>1))return 0;const p=1/den;n=Math.max(n,k);return k*Math.log(p)+(n-k)*Math.log(1-p)};
+function calc(){
+const s=S(),m=mdl(),sp=spec(m),L=m.sets.length,used=[];
+const lp=m.sets.map((_,i)=>Math.log(Math.max(sp.prior[i]||0,1e-9)));
+if(s.g>0){for(let i=0;i<L;i++)lp[i]+=ll(s.big,s.g,m.big[i])+ll(s.reg,s.g,m.reg[i]);used.push('ボーナス')}
+if(m.sreg&&m.creg&&s.sr+s.cr>0){for(let i=0;i<L;i++){const a=1/m.sreg[i],b=1/m.creg[i];lp[i]+=s.sr*Math.log(a/(a+b))+s.cr*Math.log(b/(a+b))}used.push('REG内訳')}
+const og=ownG();
+for(const[k,lab]of SMALL[m.f]){const a=sp[k];if(!a||!s[k])continue;const n=k==='suika'?s.obig*sp.gpb:og;if(n<=0)continue;for(let i=0;i<L;i++)lp[i]+=ll(s[k],n,a[i]);used.push(lab)}
+for(let i=0;i<Math.min(s.conf,L);i++)lp[i]=-Infinity;
+if(s.conf)used.push(m.sets[Math.min(s.conf,L-1)]+(s.conf>=L-1?'確定':'以上確定'));
+const mx=Math.max(...lp);const w=lp.map(v=>isFinite(v)?Math.exp(v-mx):0);const t=w.reduce((a,b)=>a+b,0)||1;
+return{p:w.map(v=>v/t),used}}
+const rate=(k,n)=>k>0&&n>0?'1/'+(n/k).toFixed(n/k<20?2:1):'—';
+const near=(k,n,arr)=>{if(!arr||!k||!n)return -1;const p=k/n;let b=0,d=1e9;arr.forEach((v,i)=>{const x=Math.abs(1/v-p);if(x<d){d=x;b=i}});return b};
+const pct=v=>(v*100).toFixed(v>=.995||v<.005?0:1)+'%';
+function render(){
+const s=S(),m=mdl(),sp=spec(m),{p,used}=calc(),L=m.sets.length;
+const all=AM();
+$('model').innerHTML=['j','h'].map(f=>`<optgroup label="${FAM[f]}">${all.filter(x=>x.f===f).map(x=>`<option value="${x.id}"${x.id===m.id?' selected':''}>${esc(x.n)}${x.custom?'（追加）':''}</option>`).join('')}</optgroup>`).join('');
+if(document.activeElement!==$('tag'))$('tag').value=s.tag||'';
+const top=p.indexOf(Math.max(...p));
+$('bars').style.gridTemplateColumns=`repeat(${L},minmax(0,1fr))`;
+$('bars').innerHTML=m.sets.map((n,i)=>`<div class="bar${i===top?' top':''}"><b class="num">${pct(p[i])}</b><i style="height:${Math.max(2,p[i]*100*0.82)}%"></i><span>設定${n}</span></div>`).join('');
+const hiFrom=L>=6?3:3;const hi=p.slice(hiFrom).reduce((a,b)=>a+b,0);
+$('fTop').textContent='設定'+m.sets[top];$('fHiL').textContent=m.sets[hiFrom]+'以上';$('fHi').textContent=pct(hi);
+$('fRate').textContent=m.rate&&m.rate.length===L?(p.reduce((a,v,i)=>a+v*m.rate[i],0)).toFixed(1)+'%':'—';
+$('basis').textContent=(s.sample?'サンプル表示中　':'')+'自分の消化'+ownG()+'G　使用：'+(used.length?used.join('・'):'まだデータがありません');
+for(const k of['g','big','reg','g0'])if(document.activeElement!==$(k))$(k).value=s[k]||'';
+$('ownG').textContent='小役は自分の消化G（総G−開始G）で計算。自分で引いたボーナスは台データにも加算されます。';
+const K=(key,lab,cls)=>`<button class="k ${cls||''}" data-k="${key}"><em>${lab}</em><span class="num">${s[key]}</span></button>`;
+$('pad').style.gridTemplateColumns=m.f===H?'repeat(2,minmax(0,1fr))':'';
+if(m.f===J){$('pad').innerHTML=K('sb','単独BIG','bb')+K('cb','チェリーBIG','bb')+K('sr','単独REG','rb')+K('cr','チェリーREG','rb')+K('grape','ブドウ','gr')+K('cherry','チェリー（非重複）');$('lamps').innerHTML=''}
+else{$('pad').innerHTML=K('obig','BIG','bb')+K('oreg','REG','rb')+K('bell','ベル','gr')+K('suika','BIG中スイカ');
+const ch=(arr,lab)=>`<div><div class="lbl">${lab}</div><div class="chips">${COL.map((c,i)=>`<button class="c${i}" data-a="${arr}" data-i="${i}">${c}<span class="num">${s[arr][i]}</span></button>`).join('')}</div></div>`;
+$('lamps').innerHTML=ch('side','REG中サイドランプ（スイカ揃い時）')+ch('fb','BIG後フェザーランプ')+ch('fr','REG後フェザーランプ')}
+$('conf').innerHTML=m.sets.map((n,i)=>i===0?`<button data-c="0" class="${s.conf===0?'on':''}">なし</button>`:`<button data-c="${i}" class="${s.conf===i?'on':''}">${esc(n)}${i===L-1?'確定':'以上'}</button>`).join('');
+const og=ownG(),rows=[['BIG',s.big,s.g,m.big],['REG',s.reg,s.g,m.reg],['合算',s.big+s.reg,s.g,m.big.map((b,i)=>1/(1/b+1/m.reg[i]))]];
+if(m.f===J){if(m.sreg){rows.push(['単独REG（自分）',s.sr,og,m.sreg],['チェリーREG（自分）',s.cr,og,m.creg])}rows.push(['ブドウ',s.grape,og,sp.grape],['チェリー',s.cherry,og,sp.cherry])}
+else rows.push(['ベル',s.bell,og,sp.bell],['BIG中スイカ',s.suika,s.obig*sp.gpb,sp.suika]);
+$('stat').innerHTML=`<thead><tr><th>項目</th><th>回数</th><th>実測</th>${m.sets.map(n=>`<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>`+rows.map(([lab,k,n,arr])=>{const h=near(k,n,arr);return`<tr><td>${lab}</td><td class="num">${k}</td><td class="num">${rate(k,n)}</td>${m.sets.map((_,i)=>`<td class="num${i===h?' hit':''}">${arr?'1/'+(+arr[i]).toFixed(arr[i]<20?2:1):'—'}</td>`).join('')}</tr>`}).join('')+'</tbody>';
+const ov=store.ov[m.id]||{};
+const er=(k,lab)=>`<tr><td>${lab}</td>${m.sets.map((_,i)=>{const a=ov[k]!==undefined?ov[k]:m[k];return`<td><input class="num" type="number" step="0.01" inputmode="decimal" data-e="${k}" data-i="${i}" value="${a&&a[i]?a[i]:''}" aria-label="${lab} 設定${m.sets[i]}"></td>`}).join('')}</tr>`;
+$('spec').innerHTML=`<thead><tr><th>項目（1/x）</th>${m.sets.map(n=>`<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>`+
+`<tr><td>BIG</td>${m.big.map(v=>`<td class="num">${v}</td>`).join('')}</tr><tr><td>REG</td>${m.reg.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`+
+(m.sreg?`<tr><td>単独REG</td>${m.sreg.map(v=>`<td class="num">${v}</td>`).join('')}</tr><tr><td>チェリーREG</td>${m.creg.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`:'')+
+(m.rate?`<tr><td>機械割%</td>${m.rate.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`:'')+
+SMALL[m.f].map(([k,lab])=>er(k,lab)).join('')+
+`<tr><td>事前配分%</td>${m.sets.map((_,i)=>`<td><input class="num" type="number" inputmode="decimal" data-e="prior" data-i="${i}" value="${+sp.prior[i].toFixed(1)}" aria-label="事前配分 設定${m.sets[i]}"></td>`).join('')}</tr></tbody>`;
+$('delModel').hidden=!m.custom;
+$('specNote').textContent=(m.note?m.note+'。':'')+(m.f===H?'ハナハナの小役は設定別数値が公表されていないため空欄。分かる数値を入れると推測に加わります。BIG中スイカは「BIG中1Gあたり」、BIG1回='+sp.gpb+'Gで換算。':'空欄にした小役は推測に使いません。')+' 事前配分はホールの設定配分の想定（初期値は均等）。';
+$('hist').innerHTML=store.hist.length?store.hist.map((h,i)=>{const hm=all.find(x=>x.id===h.s.model)||M[0];return`<li><span><b>${esc(h.s.tag||'台番号なし')}</b> ${esc(hm.n)}<br><small class="num">${new Date(h.t).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}　${h.s.g}G　BIG${h.s.big} REG${h.s.reg}</small></span><span><button data-h="${i}">開く</button> <button data-d="${i}">削除</button></span></li>`}).join(''):'<li class="muted">まだありません。「記録に保存」で台ごとに残せます。</li>';
+if(m.f!==H&&view==='lamp')view='count';
+const T=[['count','カウント'],...(m.f===H?[['lamp','ランプ']]:[]),['stat','判別'],['spec','数値'],['hist','記録']];
+$('tabs').innerHTML=T.map(([k,l])=>`<button data-v="${k}" class="${k===view?'act':''}">${l}</button>`).join('');
+for(const v of['count','lamp','stat','spec','hist'])$('v-'+v).classList.toggle('act',v===view);
+const showIn=view==='count'||view==='lamp';document.querySelector('.inputs').style.display=showIn?'':'none';
+document.body.classList.toggle('minus-on',minus);$('minus').classList.toggle('on',minus);$('minus').setAttribute('aria-pressed',minus);
+persist()}
+const ch=f=>{push();f();S().sample=false;render()};
+$('pad').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k,d=minus?-1:1;ch(()=>{const s=S();if(s[k]+d<0)return;s[k]+=d;const link={sb:'big',cb:'big',obig:'big',sr:'reg',cr:'reg',oreg:'reg'}[k];if(link)s[link]=Math.max(0,s[link]+d)});try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}});
+$('lamps').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;ch(()=>{const a=S()[b.dataset.a],i=+b.dataset.i;a[i]=Math.max(0,a[i]+(minus?-1:1))})});
+$('conf').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b)ch(()=>{S().conf=+b.dataset.c})});
+for(const k of['g','big','reg','g0']){$(k).addEventListener('focus',()=>push());$(k).addEventListener('input',()=>{S()[k]=Math.max(0,parseInt($(k).value)||0);S().sample=false;render()})}
+$('tag').addEventListener('input',()=>{S().tag=$('tag').value;persist()});
+$('model').addEventListener('change',()=>ch(()=>{const s=S(),nm=$('model').value,nf=AM().find(x=>x.id===nm).f;if(nf!==mdl().f){Object.assign(s,blank(nm),{g:s.g,big:s.big,reg:s.reg,g0:s.g0,tag:s.tag})}s.model=nm;s.conf=0}));
+$('startNow').addEventListener('click',()=>ch(()=>{S().g0=S().g}));
+$('minus').addEventListener('click',()=>{minus=!minus;render();toast(minus?'タップで1減らします':'通常モード')});
+$('undo').addEventListener('click',()=>{if(!undo.length)return toast('戻せる操作がありません');store.cur=JSON.parse(undo.pop());render()});
+$('reset').addEventListener('click',e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.textContent='もう一度';setTimeout(()=>{delete b.dataset.ok;b.textContent='新しい台'},2500);return}delete b.dataset.ok;b.textContent='新しい台';ch(()=>{store.cur=blank(S().model)});toast('リセットしました（元に戻す可）')});
+$('save').addEventListener('click',()=>{store.hist.unshift({t:Date.now(),s:JSON.parse(JSON.stringify(S()))});store.hist=store.hist.slice(0,40);render();toast('保存しました')});
+$('hist').addEventListener('click',e=>{const o=e.target.closest('[data-h]'),d=e.target.closest('[data-d]');if(o)ch(()=>{store.cur=JSON.parse(JSON.stringify(store.hist[+o.dataset.h].s))});if(d){store.hist.splice(+d.dataset.d,1);render()}});
+$('copy').addEventListener('click',async()=>{const s=S(),m=mdl(),{p}=calc();const t=`${m.n} ${s.tag||''}\n${s.g}G BIG${s.big}(${rate(s.big,s.g)}) REG${s.reg}(${rate(s.reg,s.g)}) 合算${rate(s.big+s.reg,s.g)}\n`+(m.f===J?`ブドウ${s.grape}(${rate(s.grape,ownG())}) チェリー${s.cherry} 単独REG${s.sr} チェリーREG${s.cr}`:`ベル${s.bell}(${rate(s.bell,ownG())}) BIG中スイカ${s.suika}/BIG${s.obig}`)+`\n`+m.sets.map((n,i)=>`設定${n}:${pct(p[i])}`).join(' ');try{await navigator.clipboard.writeText(t);toast('コピーしました')}catch(x){toast('コピーできませんでした')}});
+$('spec').addEventListener('change',e=>{const t=e.target.closest('[data-e]');if(!t)return;const m=mdl(),k=t.dataset.e,i=+t.dataset.i,o=store.ov[m.id]=store.ov[m.id]||{};const base=k==='prior'?spec(m).prior:(o[k]!==undefined?o[k]:m[k])||m.sets.map(()=>null);o[k]=base.slice();o[k][i]=parseFloat(t.value)||(k==='prior'?0:null);render()});
+$('specReset').addEventListener('click',()=>{delete store.ov[mdl().id];render();toast('初期値に戻しました')});
+
+const N=a=>Array.isArray(a)?a.map(v=>{const x=parseFloat(String(v).replace(/^1\//,''));return x>1?x:null}):null;
+const okArr=(a,L)=>a&&a.length===L&&a.every(v=>v>1);
+let draft=null;
+const openSheet=()=>{$('sheet').classList.add('open');$('nPrev').innerHTML='';draft=null};
+$('addBtn').addEventListener('click',openSheet);
+$('shClose').addEventListener('click',()=>$('sheet').classList.remove('open'));
+const say=(t,w)=>{const e=$('nMsg');e.textContent=t;e.className='msg'+(w?' warn':'')};
+function regexParse(txt,fam){const rows=[];for(const line of txt.split(/\n/)){const m=line.match(/設定\s*([1-6V])|^\s*([1-6V])\s/);const fr=[...line.matchAll(/1\s*\/\s*([0-9]+(?:\.[0-9]+)?)/g)].map(x=>+x[1]);const pc=[...line.matchAll(/([0-9]{2,3}(?:\.[0-9]+)?)\s*%/g)].map(x=>+x[1]);if(m&&fr.length>=2)rows.push({s:m[1]||m[2],fr,pc})}
+const seen=new Map();rows.forEach(r=>{if(!seen.has(r.s))seen.set(r.s,r)});const rs=[...seen.values()];if(rs.length<4)return null;
+return{sets:rs.map(r=>r.s),big:rs.map(r=>r.fr[0]),reg:rs.map(r=>r.fr[1]),rate:rs.every(r=>r.pc.length)?rs.map(r=>r.pc[r.pc.length-1]):null,family:fam}}
+const PROMPT=(name,fam,txt)=>`あなたはパチスロのスペック表を構造化するアシスタントです。対象機種:「${name||'不明'}」(${fam==='h'?'ハナハナ系(沖スロ)':'ジャグラー系'})。
+${txt?'以下の貼り付けテキストに書かれている数値だけを使ってください。書かれていない項目はnullにし、推測で埋めないこと。\n---\n'+txt.slice(0,6000)+'\n---':'あなたの知識にある公表値・解析値を答えてください。知らない機種や自信のない項目はnullにし、作り話をしないこと。'}
+次のJSONだけを返してください（説明文なし）:
+{"name":機種名,"sets":["1","2",...設定ラベル],"big":[BIG確率の分母...],"reg":[REG確率の分母...],"rate":[機械割%...]またはnull,"grape":[ブドウ分母]またはnull,"cherry":[非重複チェリー分母]またはnull,"bell":[ベル分母]またはnull,"suika":[BIG中スイカ分母]またはnull,"sreg":[単独REG分母]またはnull,"creg":[チェリー重複REG分母]またはnull,"known":true/false(この機種を知っているか),"note":"出典や注意を一文"}
+分母は数値（1/273.1なら273.1）。配列の長さはsetsと同じにすること。`;
+async function aiRead(useText){const name=$('nName').value.trim(),fam=$('nFam').value,txt=useText?$('nPaste').value.trim():'';
+if(useText&&!txt)return say('表を貼り付けてください',true);if(!useText&&!name)return say('機種名を入れてください',true);
+let sp=null;try{sp=await window.claude?.use?.('sample')}catch(e){}
+if(!sp){if(useText){const r=regexParse(txt,fam);if(r){r.name=name;preview(r,'貼り付けから読み取り（簡易解析）');return}return say('読み取れませんでした。「設定1 1/273.1 1/409.6」のような行を含む表を貼ってください',true)}return say('この画面ではAIを使えません。表の貼り付けをお使いください',true)}
+say(useText?'読み取り中…':'AIに問い合わせ中…');
+try{const r=await sp.json(PROMPT(name,fam,txt),{modelTier:'default'});if(!r||(!useText&&r.known===false))return say('AIはこの機種のデータを持っていないようです。解析サイトの表を貼り付けてください',true);r.family=fam;if(!r.name)r.name=name;preview(r,useText?'貼り付けから読み取り':'AIの知識による推定（要確認）')}
+catch(e){if(useText){const r=regexParse(txt,fam);if(r){r.name=name;return preview(r,'貼り付けから読み取り（簡易解析）')}}say(e&&e.code==='rate_limited'?'混み合っています。少し待ってからもう一度':'読み取りに失敗しました',true)}}
+function preview(r,src){const sets=(Array.isArray(r.sets)&&r.sets.length>=2?r.sets:S6).map(String).slice(0,6),L=sets.length;
+const d={id:'c'+Date.now(),f:r.family==='h'?H:J,n:String(r.name||'追加機種').slice(0,40),sets,big:N(r.big),reg:N(r.reg),rate:N(r.rate),note:src+(r.note?'：'+String(r.note).slice(0,80):'')};
+for(const k of['grape','cherry','bell','suika','sreg','creg']){const a=N(r[k]);if(okArr(a,L))d[k]=a}
+if(d.rate&&!(d.rate.length===L&&d.rate.every(v=>v>50&&v<150)))delete d.rate;
+if(!(d.sreg&&d.creg)){delete d.sreg;delete d.creg}
+if(!okArr(d.big,L)||!okArr(d.reg,L)){d.big=okArr(d.big,L)?d.big:sets.map(()=>null);d.reg=okArr(d.reg,L)?d.reg:sets.map(()=>null)}
+draft=d;renderDraft(src.includes('AI')&&!src.includes('貼り付け'))}
+function renderDraft(warn){const d=draft,L=d.sets.length,rows=[['big','BIG'],['reg','REG'],['rate','機械割%'],...(d.f===J?[['grape','ブドウ'],['cherry','チェリー'],['sreg','単独REG'],['creg','チェリーREG']]:[['bell','ベル'],['suika','BIG中スイカ']])];
+say(warn?'AIの推定値です。解析サイトの数字と見比べて、違うところは直してから追加してください。':'読み取った数字です。違うところは直してから追加してください。',warn);
+$('nPrev').innerHTML=`<div class="scroll"><table class="ed"><thead><tr><th>1/x</th>${d.sets.map(n=>`<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>${rows.map(([k,l])=>`<tr><td>${l}</td>${d.sets.map((_,i)=>`<td><input class="num" type="number" step="0.01" inputmode="decimal" data-dk="${k}" data-i="${i}" value="${d[k]&&d[k][i]!=null?d[k][i]:''}"></td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="muted">BIGとREGは必須。空欄の小役は推測に使いません。</p><button class="prim" id="nAdd">この内容で追加</button>`}
+$('nPrev').addEventListener('change',e=>{const t=e.target.closest('[data-dk]');if(!t||!draft)return;const k=t.dataset.dk,L=draft.sets.length;draft[k]=draft[k]||Array(L).fill(null);draft[k][+t.dataset.i]=parseFloat(t.value)||null});
+$('nPrev').addEventListener('click',e=>{if(!e.target.closest('#nAdd')||!draft)return;const d=draft,L=d.sets.length;if(!okArr(d.big,L)||!okArr(d.reg,L))return say('BIGとREGを全設定ぶん入れてください',true);
+for(const k of['rate','grape','cherry','bell','suika','sreg','creg'])if(d[k]&&!okArr(d[k],L))delete d[k];
+if(d.bell||d.suika){store.ov[d.id]={bell:d.bell||undefined,suika:d.suika||undefined};delete d.bell;delete d.suika}
+store.custom=store.custom||[];store.custom.push(d);$('sheet').classList.remove('open');ch(()=>{const s=S();const keep={g:s.g,big:s.big,reg:s.reg,g0:s.g0,tag:s.tag};store.cur=Object.assign(blank(d.id),keep)});toast('追加しました')});
+$('nRead').addEventListener('click',()=>aiRead(true));
+$('nAsk').addEventListener('click',()=>aiRead(false));
+if(!window.claude?.use){$('nAsk').hidden=true;$('nMsg').textContent='解析サイト（ちょんぼりすた、1geki、パチ7など）の表をコピーして貼り付けると、「設定1 1/273.1 1/409.6 …」の形の行からBIG・REG・機械割を読み取ります。読み取った後に小役の数値も手入力できます。'}
+if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+$('delModel').addEventListener('click',e=>{const b=e.currentTarget,m=mdl();if(!m.custom)return;if(!b.dataset.ok){b.dataset.ok=1;b.textContent='もう一度押すと削除';setTimeout(()=>{delete b.dataset.ok;b.textContent='この追加機種を削除'},2500);return}delete b.dataset.ok;b.textContent='この追加機種を削除';store.custom=store.custom.filter(c=>c.id!==m.id);delete store.ov[m.id];ch(()=>{S().model=M[0].id});toast('削除しました')});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){view=b.dataset.v;render()}});
+render();
+}
+</script>
+</body>
+</html>
