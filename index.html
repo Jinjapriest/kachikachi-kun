@@ -87,6 +87,9 @@ button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .chips button{padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64px;font-size:14px}
 .chips .num{font-size:26px;line-height:1}
 .c0{border-bottom:5px solid #2f6fe0!important}.c1{border-bottom:5px solid #f2c200!important}.c2{border-bottom:5px solid #20a35a!important}.c3{border-bottom:5px solid #e0243c!important}.c4{border-bottom:5px solid transparent!important;border-image:linear-gradient(90deg,#e0243c,#f2c200,#20a35a,#2f6fe0,#9b4be0) 1!important}
+.judge{font-size:14px;border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
+.judge div{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:8px;padding:4px 0}
+.judge b{font-size:13px;color:var(--sub)}
 .lbl{font-size:14px;font-weight:700;color:var(--sub)}
 h3{font-size:16px;margin:4px 0 6px}
 .cf{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
@@ -137,10 +140,11 @@ td.hit{background:color-mix(in srgb,var(--yel) 40%,transparent);font-weight:700}
 <label>開始G<input id="g0" class="num" type="number" inputmode="numeric" min="0"></label>
 </div>
 <div class="view act" id="v-count"><div class="pad" id="pad"></div></div>
-<div class="view" id="v-lamp"><div class="chipbox" id="lamps"></div></div>
+<div class="view sc" id="v-lamp"><div class="chipbox" id="lamps"></div></div>
 <div class="view sc" id="v-stat">
 <h3>確定演出で絞り込み</h3><div class="cf" id="conf"></div>
 <h3>実測と設定差</h3><div class="scroll"><table id="stat"></table></div>
+<div class="judge" id="lampJ"></div>
 <p class="muted" id="ownG"></p>
 </div>
 <div class="view sc" id="v-spec">
@@ -199,10 +203,10 @@ const M=[
 {id:'girls',f:J,n:'ジャグラーガールズSS',big:[273.07,270.81,260.06,250.14,243.63,225.99],reg:[381.02,350.46,316.60,281.27,270.81,252.06],rate:[97.0,97.9,99.9,102.1,104.0,107.5],grape:[5.98,5.98,5.98,5.98,5.88,5.83]},
 {id:'mister',f:J,n:'ミスタージャグラー',big:[268.6,267.5,260.1,249.2,240.9,237.4],reg:[374.5,354.2,331.0,291.3,257.0,237.4],grape:[6.29,6.22,6.15,6.09,6.02,5.96]},
 {id:'ultra',f:J,n:'ウルトラミラクルジャグラー',big:[267.49,261.10,256.00,242.73,233.22,216.29],reg:[425.56,402.06,350.46,322.84,297.89,277.69],rate:[97.0,98.1,99.8,102.1,104.5,108.1],note:'ブドウ確率の設定別数値は未判明。分かれば下で入力してください'},
-{id:'houou',f:H,n:'ハナハナホウオウ～天翔～（25/30）',big:[297,284,273,262,249,236],reg:[496,458,425,397,366,337],rate:[97,99,101,103,106,109],note:'サイドランプの奇数/偶数示唆は25φと30φで逆になるとの情報あり'},
-{id:'king30',f:H,n:'キングハナハナ-30',big:[292,280,268,257,244,232],reg:[489,452,420,390,360,332],rate:[97,99,101,104,107,110]},
-{id:'dragon',f:H,n:'ドラゴンハナハナ～閃光～',big:[256,246,235,224,212,199],reg:[642,585,537,489,442,399],rate:[97,99,101,104,107,110],note:'30φ・25φ・スマスロ共通スペック'},
-{id:'nkv',f:H,n:'ニューキングハナハナV',sets:['1','2','3','4','V'],big:[299,291,281,268,253],reg:[496,471,442,409,372],rate:[97,99,101,104,108],note:'設定は1・2・3・4・Vの5段階（30φ/スマスロ）'}
+{id:'houou',f:H,lamp:{side:'REG中',fea:'トップランプ',regConf:false,swap:true},n:'ハナハナホウオウ～天翔～（25/30）',big:[297,284,273,262,249,236],reg:[496,458,425,397,366,337],rate:[97,99,101,103,106,109],note:'サイドランプの奇数/偶数示唆は25φと30φで逆になるとの情報あり'},
+{id:'king30',f:H,lamp:{side:'REG中',fea:'フェザーランプ',regConf:true},n:'キングハナハナ-30',big:[292,280,268,257,244,232],reg:[489,452,420,390,360,332],rate:[97,99,101,104,107,110]},
+{id:'dragon',f:H,lamp:{side:'REG中',fea:'フェザーランプ',regConf:true},n:'ドラゴンハナハナ～閃光～',big:[256,246,235,224,212,199],reg:[642,585,537,489,442,399],rate:[97,99,101,104,107,110],note:'30φ・25φ・スマスロ共通スペック'},
+{id:'nkv',f:H,lamp:{side:'BIG後半',fea:'ハイビスカスランプ',regConf:false},n:'ニューキングハナハナV',sets:['1','2','3','4','V'],big:[299,291,281,268,253],reg:[496,471,442,409,372],rate:[97,99,101,104,108],note:'設定は1・2・3・4・Vの5段階（30φ/スマスロ）'}
 ];
 M.forEach(m=>{m.sets=m.sets||S6});
 const AM=()=>M.concat((store.custom||[]).map(c=>Object.assign({sets:S6,custom:true},c)));
@@ -237,6 +241,16 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const ownG=()=>Math.max(0,(S().g||0)-(S().g0||0));
 const spec=m=>{const o=store.ov[m.id]||{};const pick=k=>{const a=o[k]!==undefined?o[k]:m[k];return a&&a.some(v=>v>0)?a:null};return{grape:pick('grape'),cherry:pick('cherry'),bell:pick('bell'),suika:pick('suika'),prior:o.prior||m.sets.map(()=>100/m.sets.length),gpb:o.gpb||24}};
 const ll=(k,n,den)=>{if(!(den>1))return 0;const p=1/den;n=Math.max(n,k);return k*Math.log(p)+(n-k)*Math.log(1-p)};
+function autoConf(s,m){if(!m.lamp||!m.lamp.regConf||!s.fr)return 0;let c=0;s.fr.forEach((v,i)=>{if(v>0)c=Math.max(c,i+1)});return Math.min(c,m.sets.length-1)}
+function lampText(s,m){const L=m.lamp;if(!L)return'';const sd=s.side,sw=L.swap&&store.swap30;const oddW=sw?sd[1]:sd[0],oddS=sw?sd[3]:sd[2],evW=sw?sd[0]:sd[1],evS=sw?sd[2]:sd[3];
+const odd=oddW+oddS*2,ev=evW+evS*2,tot=sd.reduce((a,b)=>a+b,0);let v='まだデータなし';
+if(sd[4])v='虹あり：高設定示唆';else if(tot){v=odd>ev?'奇数寄り':ev>odd?'偶数寄り':'奇偶は五分';if(oddS+evS)v+=`（強示唆 ${oddS+evS}回）`}
+const ob=s.obig||0,orr=s.oreg||0,fbc=s.fb.reduce((a,b)=>a+b,0),frc=s.fr.reduce((a,b)=>a+b,0);
+const hiB=s.fb.map((n,i)=>n?COL[i]+n:'').filter(Boolean).join(' ');
+const fr=s.fr.map((n,i)=>n?COL[i]+n:'').filter(Boolean).join(' ');const ac=autoConf(s,m);
+return[['サイドランプ（'+L.side+'）',`${v}　奇数示唆 ${oddW+oddS}回／偶数示唆 ${evW+evS}回`],
+['BIG後'+L.fea,fbc?`${hiB}（BIG${ob}回中 ${ob?Math.round(fbc/ob*100)+'%':'-'} 点灯）`:'白以外なし'],
+['REG後'+L.fea,frc?(L.regConf&&ac?`${fr} → 設定${m.sets[ac]}${ac>=m.sets.length-1?'確定':'以上確定'}（自動で絞り込み中）`:`${fr}（REG${orr}回中）　白以外は高設定示唆`):'白以外なし']]}
 function calc(){
 const s=S(),m=mdl(),sp=spec(m),L=m.sets.length,used=[];
 const lp=m.sets.map((_,i)=>Math.log(Math.max(sp.prior[i]||0,1e-9)));
@@ -244,8 +258,9 @@ if(s.g>0){for(let i=0;i<L;i++)lp[i]+=ll(s.big,s.g,m.big[i])+ll(s.reg,s.g,m.reg[i
 if(m.sreg&&m.creg&&s.sr+s.cr>0){for(let i=0;i<L;i++){const a=1/m.sreg[i],b=1/m.creg[i];lp[i]+=s.sr*Math.log(a/(a+b))+s.cr*Math.log(b/(a+b))}used.push('REG内訳')}
 const og=ownG();
 for(const[k,lab]of SMALL[m.f]){const a=sp[k];if(!a||!s[k])continue;const n=k==='suika'?s.obig*sp.gpb:og;if(n<=0)continue;for(let i=0;i<L;i++)lp[i]+=ll(s[k],n,a[i]);used.push(lab)}
-for(let i=0;i<Math.min(s.conf,L);i++)lp[i]=-Infinity;
-if(s.conf)used.push(m.sets[Math.min(s.conf,L-1)]+(s.conf>=L-1?'確定':'以上確定'));
+const ac=autoConf(s,m),cf=Math.max(s.conf,ac);
+for(let i=0;i<Math.min(cf,L);i++)lp[i]=-Infinity;
+if(cf)used.push((ac>=s.conf&&ac?'REG後'+m.lamp.fea+'で':'')+m.sets[Math.min(cf,L-1)]+(cf>=L-1?'確定':'以上確定'));
 const mx=Math.max(...lp);const w=lp.map(v=>isFinite(v)?Math.exp(v-mx):0);const t=w.reduce((a,b)=>a+b,0)||1;
 return{p:w.map(v=>v/t),used}}
 const rate=(k,n)=>k>0&&n>0?'1/'+(n/k).toFixed(n/k<20?2:1):'—';
@@ -269,7 +284,10 @@ s.cnt=s.cnt||{};const its=items(),ni=its.length;
 $('pad').style.gridTemplateColumns=`repeat(${ni<=4?2:ni<=9?3:4},minmax(0,1fr))`;
 $('pad').innerHTML=ni?its.map(it=>`<button class="k ${CLS[it.c]||''}" data-id="${esc(it.id)}"><em>${esc(it.l||'無題')}</em><span class="num">${val(s,it)}</span></button>`).join(''):'<p class="muted">「項目」タブでカウンターを追加してください</p>';
 const chp=(arr,lab)=>`<div><div class="lbl">${lab}</div><div class="chips">${COL.map((c,i)=>`<button class="c${i}" data-a="${arr}" data-i="${i}">${c}<span class="num">${s[arr][i]}</span></button>`).join('')}</div></div>`;
-$('lamps').innerHTML=lampOn()?chp('side','REG中サイドランプ（スイカ揃い時）')+chp('fb','BIG後フェザーランプ')+chp('fr','REG後フェザーランプ'):'';
+const LM=m.lamp||{side:'REG中',fea:'フェザーランプ'};
+const lt=lampText(s,m);
+$('lamps').innerHTML=lampOn()?chp('side',LM.side+'サイドランプ（白7ビタ押し→スイカ揃い時）')+chp('fb','BIG後'+LM.fea)+chp('fr','REG後'+LM.fea+(LM.regConf?'（青2↑ 黄3↑ 緑4↑ 赤5↑ 虹6確定）':''))+
+(lt?`<div class="judge">${lt.map(([a,b])=>`<div><b>${a}</b><span>${esc(b)}</span></div>`).join('')}${LM.swap?`<label class="chk"><input type="checkbox" id="swap30"${store.swap30?' checked':''}>30φ版（青・緑＝偶数示唆）</label>`:''}</div>`:''):'';
 const md=mode();
 $('modes').innerHTML=[['auto','機種に合わせる'],['j','ジャグ テンプレ'],['h','ハナハナ テンプレ'],['c','カスタム']].map(([k,l])=>`<button data-md="${k}" class="${md===k?'on':''}">${l}</button>`).join('');
 $('modes').style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
@@ -278,6 +296,7 @@ if(md==='c'){const used=new Set(its.map(x=>x.r));
 $('itemEd').innerHTML=its.map((it,i)=>`<div class="it" data-row="${i}"><input value="${esc(it.l||'')}" data-f="l" aria-label="名前" placeholder="ボタン名"><button data-mv="-1" aria-label="上へ">↑</button><button data-mv="1" aria-label="下へ">↓</button><button data-del aria-label="削除">✕</button><div class="r2"><select data-f="r" aria-label="役割">${Object.entries(ROLE).map(([k,l])=>`<option value="${k}"${k===it.r?' selected':''}${k!=='free'&&k!==it.r&&used.has(k)?' disabled':''}>${l}</option>`).join('')}</select><select data-f="c" aria-label="色">${Object.entries(CLR).map(([k,l])=>`<option value="${k}"${k===it.c?' selected':''}>${l}</option>`).join('')}</select></div></div>`).join('')+
 `<div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button id="itAdd">＋項目を追加</button><button data-load="j">ジャグ テンプレを読込</button><button data-load="h">ハナハナ テンプレを読込</button></div><label class="chk"><input type="checkbox" id="lampChk"${store.lamp?' checked':''}>ランプ色カウント（サイド・フェザー）を使う</label>`}
 else $('itemEd').innerHTML=`<div class="lbl">今のボタン</div><p>${its.map(x=>esc(x.l)).join('・')}</p>`;
+$('lampJ').innerHTML=lt&&lampOn()?'<h3>ランプ判別</h3>'+lt.map(([a,b])=>`<div><b>${a}</b><span>${esc(b)}</span></div>`).join(''):'';
 $('conf').innerHTML=m.sets.map((n,i)=>i===0?`<button data-c="0" class="${s.conf===0?'on':''}">なし</button>`:`<button data-c="${i}" class="${s.conf===i?'on':''}">${esc(n)}${i===L-1?'確定':'以上'}</button>`).join('');
 const og=ownG(),rows=[['BIG',s.big,s.g,m.big],['REG',s.reg,s.g,m.reg],['合算',s.big+s.reg,s.g,m.big.map((b,i)=>1/(1/b+1/m.reg[i]))]];
 if(m.f===J){if(m.sreg){rows.push(['単独REG（自分）',s.sr,og,m.sreg],['チェリーREG（自分）',s.cr,og,m.creg])}rows.push(['ブドウ',s.grape,og,sp.grape],['チェリー',s.cherry,og,sp.cherry])}
@@ -307,7 +326,8 @@ $('pad').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!
 $('modes').addEventListener('click',e=>{const b=e.target.closest('[data-md]');if(!b)return;const k=b.dataset.md;if(k==='c'&&mode()!=='c'){const t=curT();store.items=TPL[t==='c'?mdl().f:t].map(x=>Object.assign({id:x.r},x));store.lamp=t==='h'}store.mode=k;render();toast(k==='c'?'カスタムモード':'テンプレを切り替えました')});
 $('itemEd').addEventListener('change',e=>{const t=e.target;if(t.id==='lampChk'){store.lamp=t.checked;render();return}const row=t.closest('[data-row]');if(!row||!t.dataset.f)return;const it=store.items[+row.dataset.row];if(t.dataset.f==='r'){const old=it.r;it.r=t.value;if(t.value!=='free'){it.id=t.value}else if(old!=='free'){it.id='f'+Date.now()}if(!it.l||it.l===(ROLE[old]||'').replace(/（.*/,''))it.l=ROLE[t.value].replace(/（.*/,'')}else it[t.dataset.f]=t.value;render()});
 $('itemEd').addEventListener('click',e=>{const t=e.target;if(t.id==='itAdd'){if(store.items.length>=16)return toast('16個までです');store.items.push({id:'f'+Date.now(),r:'free',l:'項目'+(store.items.length+1),c:'wh'});render();return}const ld=t.closest('[data-load]');if(ld){store.items=TPL[ld.dataset.load].map(x=>Object.assign({id:x.r},x));store.lamp=ld.dataset.load==='h';render();toast('テンプレを読み込みました');return}const row=t.closest('[data-row]');if(!row)return;const i=+row.dataset.row,a=store.items;if(t.closest('[data-del]')){a.splice(i,1);render();return}const mv=t.closest('[data-mv]');if(mv){const j=i+(+mv.dataset.mv);if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()}});
-$('lamps').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;ch(()=>{const a=S()[b.dataset.a],i=+b.dataset.i;a[i]=Math.max(0,a[i]+(minus?-1:1))})});
+$('lamps').addEventListener('change',e=>{if(e.target.id==='swap30'){store.swap30=e.target.checked;render()}});
+$('lamps').addEventListener('click',e=>{if(e.target.closest('.chk'))return;const b=e.target.closest('[data-a]');if(!b)return;ch(()=>{const a=S()[b.dataset.a],i=+b.dataset.i;a[i]=Math.max(0,a[i]+(minus?-1:1))})});
 $('conf').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b)ch(()=>{S().conf=+b.dataset.c})});
 for(const k of['g','big','reg','g0']){$(k).addEventListener('focus',()=>push());$(k).addEventListener('input',()=>{S()[k]=Math.max(0,parseInt($(k).value)||0);S().sample=false;render()})}
 $('tag').addEventListener('input',()=>{S().tag=$('tag').value;persist()});
