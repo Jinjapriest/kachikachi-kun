@@ -146,8 +146,8 @@ td.hit{background:color-mix(in srgb,var(--yel) 40%,transparent);font-weight:700}
 </section>
 <div class="inputs">
 <label>総G<input id="g" class="num" type="number" inputmode="numeric" min="0"></label>
-<label>BIG<input id="big" class="num" type="number" inputmode="numeric" min="0"></label>
-<label>REG<input id="reg" class="num" type="number" inputmode="numeric" min="0"></label>
+<label><span id="lbBig">BIG</span><input id="big" class="num" type="number" inputmode="numeric" min="0"></label>
+<label><span id="lbReg">REG</span><input id="reg" class="num" type="number" inputmode="numeric" min="0"></label>
 <label>開始G<input id="g0" class="num" type="number" inputmode="numeric" min="0"></label>
 </div>
 <div class="seg" id="seg"><button data-v="count">カウント</button><button data-v="lamp">ランプ</button></div>
@@ -228,19 +228,25 @@ M.push(
 {id:'shake',f:'s',tpl:'s',n:'SHAKE BONUS TRIGGER',sets:['1','2','5','6'],big:[350.5,327.7,341.3,297.9],reg:[425.6,332.7,409.6,297.9],small:[{k:'bell',l:'ベル',arr:[10.3,10.2,9.9,9.6]},{k:'cherry',l:'チェリー',arr:[36.9,36.4,35.9,33.6]},{k:'suika2',l:'スイカ',arr:[65.5,63.6,60.0,58.4]}],note:'BIGは初当り確率（BT中の連チャンは数えない）。偶数設定ほど初当りが軽い。BIG終了画面の虹は設定6濃厚'},
 {id:'hanabi',f:'b',tpl:'b',n:'スマスロ ハナビ',sets:['1','2','5','6'],big:[297.9,292.6,284.9,273.1],reg:[394.8,358.1,313.6,282.5],small:[{k:'furin',l:'風鈴（通常時）',arr:[9.68,9.45,9.06,8.64]},{k:'hfB',l:'BIG中斜め風鈴',arr:[10,7,10,7],n:'bigG'},{k:'bara',l:'BIG中バラケ目',arr:[16384,16384,819.2,819.2],n:'bigG'}],note:'BIG中は平行風鈴・斜め風鈴・バラケ目を数えると、その合計をBIG中G数として計算。REG終了画面のピースは設定2以上濃厚（確定ボタンで絞り込み）'}
 );
-const DMM={myj5:4029,neoaim:4801,girls:4540,gogo3:4375,happy8:4230,king30:4311,nkv:4912,houou:4014,dragon:4453,shake:4893,hanabi:4928,pulbt:4791,pulsp3:3841};
+const DMM={kab2:4930,kab1:4160,ghoul:4742,myj5:4029,neoaim:4801,girls:4540,gogo3:4375,happy8:4230,king30:4311,nkv:4912,houou:4014,dragon:4453,shake:4893,hanabi:4928,pulbt:4791,pulsp3:3841};
 const dmmUrl=m=>DMM[m.id]?'https://p-town.dmm.com/machines/'+DMM[m.id]:'https://www.google.com/search?q='+encodeURIComponent('site:p-town.dmm.com '+m.n);
-const IGK={houou:'s_hanahana_houoh_tensho',king30:'s_kinghanahana2023',dragon:'s_drahana_senko30',nkv:'l_new_king_hanahana_v',pulsp3:'s_newpulsar_sp3'};
+const IGK={kab2:'l_kabaneri2',ghoul:'l_tokyoghoul',houou:'s_hanahana_houoh_tensho',king30:'s_kinghanahana2023',dragon:'s_drahana_senko30',nkv:'l_new_king_hanahana_v',pulsp3:'s_newpulsar_sp3'};
 const igkUrl=m=>IGK[m.id]?'https://1geki.jp/slot/'+IGK[m.id]+'/':'https://www.google.com/search?q='+encodeURIComponent('site:1geki.jp '+m.n);
+M.push(
+{id:'kab2',f:'a',tpl:'kab2',n:'スマスロ カバネリ 海門決戦',lab:['ボーナス初当り','ST初当り'],sl:['初当り','ST'],big:[254.2,242.3,239.6,214.0,203.2,195.1],reg:[422.5,405.9,398.7,357.2,332.6,318.5],rate:[97.5,98.5,100.8,106.0,111.0,114.9],small:[{k:'gbell',l:'下段ベル',arr:[121.1,114.4,112.8,106.2,104.2,99.1]}],note:'2026年導入のスマスロ。総G・初当り回数はデータカウンターの数字を入力。下段ベルは通常時・AT中どちらも数えてOK（自分の消化G数で計算）'},
+{id:'kab1',f:'a',tpl:'kab1',n:'パチスロ甲鉄城のカバネリ',lab:['ボーナス合算','ST合算'],sl:['ボーナス','ST'],big:[237.0,230.7,214.0,186.5,171.3,151.3],reg:[407.9,393.2,372.4,327.2,307.3,290.6],rate:[97.8,98.8,100.7,105.9,108.4,110.0],note:'2022年導入の初代（6.5号機）'},
+{id:'ghoul',f:'a',tpl:'ghoul',n:'L 東京喰種',lab:['CZ','AT初当り'],sl:['CZ','AT'],big:[262.6,255.6,246.5,233.1,216.4,203.7],reg:[394.4,380.5,357.0,325.9,291.2,261.3],rate:[97.5,99.0,101.6,105.6,110.3,114.9],small:[{k:'epi',l:'エピソードボーナス',arr:[6620.2,5879.7,5114.5,4062.5,3166.7,2639.5]},{k:'grep',l:'下段リプレイ',arr:[1260.3,1213.6,1170.3,1129.9,1092.3,1024.0]}],note:'CZはレミニセンス＋大喰いの利世の合算。ATはCZ成功で当たるため、CZとATを両方入れると判定が強めに出る点に注意'}
+);
+const LB=m=>m.lab||['BIG','REG'];
 M.forEach(m=>{m.sets=m.sets||S6});
 const tk=m=>m.tpl||m.f;
 const smalls=m=>m.small||(SMALL[m.f]||[]).map(([k,l])=>({k,l,arr:m[k],n:k==='suika'?'gpb':'own'}));
 const nOf=(s,d,sp)=>d.n==='gpb'?(s.obig||0)*sp.gpb:d.n==='bigG'?(s.hfA||0)+(s.hfB||0)+(s.bara||0):ownG();
 const AM=()=>M.concat((store.custom||[]).map(c=>Object.assign({sets:S6,custom:true},c)));
-const FAM={j:'ジャグラー',h:'ハナハナ',p:'パルサー',s:'シェイク',b:'ハナビ'};
+const FAM={j:'ジャグラー',h:'ハナハナ',p:'パルサー',s:'シェイク',b:'ハナビ',a:'AT機（スマスロ）'};
 const SMALL={j:[['grape','ブドウ'],['cherry','チェリー']],h:[['bell','ベル'],['suika','BIG中スイカ']]};
 const COL=['青','黄','緑','赤','虹'];
-const ROLE={free:'自由カウント',sb:'単独BIG（台BIGに加算）',cb:'チェリーBIG（台BIGに加算）',obig:'BIG（台BIGに加算）',sr:'単独REG（台REGに加算）',cr:'チェリーREG（台REGに加算）',oreg:'REG（台REGに加算）',grape:'ブドウ（推測に使用）',cherry:'チェリー（推測に使用）',bell:'ベル（推測に使用）',suika:'BIG中スイカ（推測に使用）',ten:'10枚役合算（推測に使用）',ch2:'チェリー合算（推測に使用）',suika2:'通常時スイカ（推測に使用）',furin:'風鈴（推測に使用）',hfA:'BIG中平行風鈴（推測に使用）',hfB:'BIG中斜め風鈴（推測に使用）',bara:'BIG中バラケ目（推測に使用）'};
+const ROLE={free:'自由カウント',sb:'単独BIG（台BIGに加算）',cb:'チェリーBIG（台BIGに加算）',obig:'BIG（台BIGに加算）',sr:'単独REG（台REGに加算）',cr:'チェリーREG（台REGに加算）',oreg:'REG（台REGに加算）',grape:'ブドウ（推測に使用）',cherry:'チェリー（推測に使用）',bell:'ベル（推測に使用）',suika:'BIG中スイカ（推測に使用）',ten:'10枚役合算（推測に使用）',ch2:'チェリー合算（推測に使用）',suika2:'通常時スイカ（推測に使用）',furin:'風鈴（推測に使用）',hfA:'BIG中平行風鈴（推測に使用）',hfB:'BIG中斜め風鈴（推測に使用）',bara:'BIG中バラケ目（推測に使用）',gbell:'下段ベル（推測に使用）',epi:'エピソードボーナス（推測に使用）',grep:'下段リプレイ（推測に使用）'};
 const CLR={rd:'赤',gn:'緑',gr:'薄緑',yl:'黄',bl:'青',wh:'白'};
 const CLS={rd:'bb',gn:'rb',gr:'gr',yl:'yl',bl:'bl',wh:''};
 const TPL={j:[{r:'sb',l:'単独BIG',c:'rd'},{r:'cb',l:'チェリーBIG',c:'rd'},{r:'sr',l:'単独REG',c:'gn'},{r:'cr',l:'チェリーREG',c:'gn'},{r:'grape',l:'ブドウ',c:'gr'},{r:'cherry',l:'チェリー（非重複）',c:'wh'}],h:[{r:'obig',l:'BIG',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'bell',l:'ベル',c:'gr'},{r:'suika',l:'BIG中スイカ',c:'wh'}]};
@@ -248,6 +254,9 @@ TPL.p3=[{r:'obig',l:'BIG',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'ten',l:'10枚役
 TPL.pbt=[{r:'obig',l:'BIG（初当り）',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'ch2',l:'チェリー',c:'gr'}];
 TPL.s=[{r:'obig',l:'BIG（初当り）',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'bell',l:'ベル',c:'gr'},{r:'cherry',l:'チェリー',c:'wh'},{r:'suika2',l:'スイカ',c:'yl'}];
 TPL.b=[{r:'obig',l:'BIG',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'furin',l:'風鈴',c:'gr'},{r:'hfA',l:'BIG中 平行風鈴',c:'wh'},{r:'hfB',l:'BIG中 斜め風鈴',c:'yl'},{r:'bara',l:'BIG中 バラケ目',c:'bl'}];
+TPL.kab2=[{r:'obig',l:'ボーナス初当り',c:'rd'},{r:'oreg',l:'ST初当り',c:'gn'},{r:'gbell',l:'下段ベル',c:'gr'}];
+TPL.kab1=[{r:'obig',l:'ボーナス',c:'rd'},{r:'oreg',l:'ST',c:'gn'}];
+TPL.ghoul=[{r:'obig',l:'CZ',c:'rd'},{r:'oreg',l:'AT初当り',c:'gn'},{r:'epi',l:'エピソードボーナス',c:'yl'},{r:'grep',l:'下段リプレイ',c:'gr'}];
 const LINK={sb:'big',cb:'big',obig:'big',sr:'reg',cr:'reg',oreg:'reg'};
 const KEY='kachikachi-v1';
 const $=id=>document.getElementById(id);
@@ -329,7 +338,8 @@ $('itemEd').innerHTML=its.map((it,i)=>`<div class="it" data-row="${i}"><input va
 else $('itemEd').innerHTML=`<div class="lbl">今のボタン</div><p>${its.map(x=>esc(x.l)).join('・')}</p>`;
 $('lampJ').innerHTML=lt&&lampOn()?'<h3>ランプ判別</h3>'+lt.map(([a,b])=>`<div><b>${a}</b><span>${esc(b)}</span></div>`).join(''):'';
 $('conf').innerHTML=m.sets.map((n,i)=>i===0?`<button data-c="0" class="${s.conf===0?'on':''}">なし</button>`:`<button data-c="${i}" class="${s.conf===i?'on':''}">${esc(n)}${i===L-1?'確定':'以上'}</button>`).join('');
-const og=ownG(),rows=[['BIG',s.big,s.g,m.big],['REG',s.reg,s.g,m.reg],['合算',s.big+s.reg,s.g,m.big.map((b,i)=>1/(1/b+1/m.reg[i]))]];
+const og=ownG(),rows=[[LB(m)[0],s.big,s.g,m.big],[LB(m)[1],s.reg,s.g,m.reg],...(m.lab?[]:[['合算',s.big+s.reg,s.g,m.big.map((b,i)=>1/(1/b+1/m.reg[i]))]])];
+$('lbBig').textContent=(m.sl||LB(m))[0];$('lbReg').textContent=(m.sl||LB(m))[1];
 if(m.sreg)rows.push(['単独REG（自分）',s.sr,og,m.sreg],['チェリーREG（自分）',s.cr,og,m.creg]);
 for(const d of smalls(m))rows.push([esc(d.l),s[d.k]||0,nOf(s,d,sp),sp[d.k]]);
 items().filter(it=>it.r==='free').forEach(it=>rows.push([esc(it.l||'無題'),val(s,it),og,null]));
@@ -337,7 +347,7 @@ $('stat').innerHTML=`<thead><tr><th>項目</th><th>回数</th><th>実測</th>${m
 const ov=store.ov[m.id]||{};
 const er=(k,lab,def)=>`<tr><td>${esc(lab)}</td>${m.sets.map((_,i)=>{const a=ov[k]!==undefined?ov[k]:def;return`<td><input class="num" type="number" step="0.01" inputmode="decimal" data-e="${k}" data-i="${i}" value="${a&&a[i]?a[i]:''}" aria-label="${lab} 設定${m.sets[i]}"></td>`}).join('')}</tr>`;
 $('spec').innerHTML=`<thead><tr><th>項目（1/x）</th>${m.sets.map(n=>`<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>`+
-`<tr><td>BIG</td>${m.big.map(v=>`<td class="num">${v}</td>`).join('')}</tr><tr><td>REG</td>${m.reg.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`+
+`<tr><td>${LB(m)[0]}</td>${m.big.map(v=>`<td class="num">${v}</td>`).join('')}</tr><tr><td>${LB(m)[1]}</td>${m.reg.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`+
 (m.sreg?`<tr><td>単独REG</td>${m.sreg.map(v=>`<td class="num">${v}</td>`).join('')}</tr><tr><td>チェリーREG</td>${m.creg.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`:'')+
 (m.rate?`<tr><td>機械割%</td>${m.rate.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`:'')+
 smalls(m).map(d=>er(d.k,d.l,d.arr)).join('')+
@@ -374,7 +384,7 @@ $('undo').addEventListener('click',()=>{if(!undo.length)return toast('戻せる�
 $('reset').addEventListener('click',e=>{const b=e.currentTarget;if(!b.dataset.ok){b.dataset.ok=1;b.textContent='もう一度';setTimeout(()=>{delete b.dataset.ok;b.textContent='新しい台'},2500);return}delete b.dataset.ok;b.textContent='新しい台';ch(()=>{store.cur=blank(S().model)});toast('リセットしました（元に戻す可）')});
 $('save').addEventListener('click',()=>{store.hist.unshift({t:Date.now(),s:JSON.parse(JSON.stringify(S()))});store.hist=store.hist.slice(0,40);render();toast('保存しました')});
 $('hist').addEventListener('click',e=>{const o=e.target.closest('[data-h]'),d=e.target.closest('[data-d]');if(o)ch(()=>{store.cur=JSON.parse(JSON.stringify(store.hist[+o.dataset.h].s))});if(d){store.hist.splice(+d.dataset.d,1);render()}});
-$('copy').addEventListener('click',async()=>{const s=S(),m=mdl(),{p}=calc();const t=`${m.n} ${s.tag||''}\n${s.g}G BIG${s.big}(${rate(s.big,s.g)}) REG${s.reg}(${rate(s.reg,s.g)}) 合算${rate(s.big+s.reg,s.g)}\n`+(m.f===J?`ブドウ${s.grape}(${rate(s.grape,ownG())}) チェリー${s.cherry} 単独REG${s.sr} チェリーREG${s.cr}`:`ベル${s.bell}(${rate(s.bell,ownG())}) BIG中スイカ${s.suika}/BIG${s.obig}`)+items().filter(it=>it.r==='free').map(it=>` ${it.l}${val(s,it)}`).join('')+`\n`+m.sets.map((n,i)=>`設定${n}:${pct(p[i])}`).join(' ');try{await navigator.clipboard.writeText(t);toast('コピーしました')}catch(x){toast('コピーできませんでした')}});
+$('copy').addEventListener('click',async()=>{const s=S(),m=mdl(),{p}=calc(),sp=spec(m),L2=LB(m);const t=`${m.n} ${s.tag||''}\n${s.g}G ${L2[0]}${s.big}(${rate(s.big,s.g)}) ${L2[1]}${s.reg}(${rate(s.reg,s.g)})\n`+smalls(m).map(d=>`${d.l}${s[d.k]||0}(${rate(s[d.k]||0,nOf(s,d,sp))})`).join(' ')+items().filter(it=>it.r==='free').map(it=>` ${it.l}${val(s,it)}`).join('')+`\n`+m.sets.map((n,i)=>`設定${n}:${pct(p[i])}`).join(' ');try{await navigator.clipboard.writeText(t);toast('コピーしました')}catch(x){toast('コピーできませんでした')}});
 $('spec').addEventListener('change',e=>{const t=e.target.closest('[data-e]');if(!t)return;const m=mdl(),k=t.dataset.e,i=+t.dataset.i,o=store.ov[m.id]=store.ov[m.id]||{};const base=k==='prior'?spec(m).prior:(o[k]!==undefined?o[k]:m[k])||m.sets.map(()=>null);o[k]=base.slice();o[k][i]=parseFloat(t.value)||(k==='prior'?0:null);render()});
 $('specReset').addEventListener('click',()=>{delete store.ov[mdl().id];render();toast('初期値に戻しました')});
 
