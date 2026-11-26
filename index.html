@@ -216,15 +216,28 @@ const M=[
 {id:'dragon',f:H,lamp:{side:'REG中',fea:'フェザーランプ',regConf:true},n:'ドラゴンハナハナ～閃光～',big:[256,246,235,224,212,199],reg:[642,585,537,489,442,399],rate:[97,99,101,104,107,110],note:'30φ・25φ・スマスロ共通スペック'},
 {id:'nkv',f:H,lamp:{side:'BIG後半',fea:'ハイビスカスランプ',regConf:false},n:'ニューキングハナハナV',sets:['1','2','3','4','V'],big:[299,291,281,268,253],reg:[496,471,442,409,372],rate:[97,99,101,104,108],note:'設定は1・2・3・4・Vの5段階（30φ/スマスロ）'}
 ];
+M.push(
+{id:'pulsp3',f:'p',tpl:'p3',n:'ニューパルサーSPⅢ',sets:['1','2','3','4','6'],big:[295.2,293.9,292.6,280.1,267.5],reg:[428.3,414.8,385.5,306.2,267.5],rate:[97.1,98.3,100.0,104.1,108.1],small:[{k:'ten',l:'10枚役合算',arr:[7.19,7.04,6.89,6.86,6.69]}],note:'設定5なしの5段階。10枚役はチェリー・オレンジ・ベルの合算'},
+{id:'pulbt',f:'p',tpl:'pbt',n:'スマスロ ニューパルサーBT',sets:['1','2','5','6'],big:[366.1,346.8,332.7,312.1],reg:[366.1,346.8,332.7,312.1],small:[{k:'ch2',l:'チェリー合算',arr:[20.2,20.0,19.9,19.7]}],note:'BIG・REGは初当り確率（BT中の連チャンは数えない）。設定1・2・5・6の4段階'},
+{id:'shake',f:'s',tpl:'s',n:'SHAKE BONUS TRIGGER',sets:['1','2','5','6'],big:[350.5,327.7,341.3,297.9],reg:[425.6,332.7,409.6,297.9],small:[{k:'bell',l:'ベル',arr:[10.3,10.2,9.9,9.6]},{k:'cherry',l:'チェリー',arr:[36.9,36.4,35.9,33.6]},{k:'suika2',l:'スイカ',arr:[65.5,63.6,60.0,58.4]}],note:'BIGは初当り確率（BT中の連チャンは数えない）。偶数設定ほど初当りが軽い。BIG終了画面の虹は設定6濃厚'},
+{id:'hanabi',f:'b',tpl:'b',n:'スマスロ ハナビ',sets:['1','2','5','6'],big:[297.9,292.6,284.9,273.1],reg:[394.8,358.1,313.6,282.5],small:[{k:'furin',l:'風鈴（通常時）',arr:[9.68,9.45,9.06,8.64]},{k:'hfB',l:'BIG中斜め風鈴',arr:[10,7,10,7],n:'bigG'},{k:'bara',l:'BIG中バラケ目',arr:[16384,16384,819.2,819.2],n:'bigG'}],note:'BIG中は平行風鈴・斜め風鈴・バラケ目を数えると、その合計をBIG中G数として計算。REG終了画面のピースは設定2以上濃厚（確定ボタンで絞り込み）'}
+);
 M.forEach(m=>{m.sets=m.sets||S6});
+const tk=m=>m.tpl||m.f;
+const smalls=m=>m.small||(SMALL[m.f]||[]).map(([k,l])=>({k,l,arr:m[k],n:k==='suika'?'gpb':'own'}));
+const nOf=(s,d,sp)=>d.n==='gpb'?(s.obig||0)*sp.gpb:d.n==='bigG'?(s.hfA||0)+(s.hfB||0)+(s.bara||0):ownG();
 const AM=()=>M.concat((store.custom||[]).map(c=>Object.assign({sets:S6,custom:true},c)));
-const FAM={j:'ジャグラー',h:'ハナハナ'};
+const FAM={j:'ジャグラー',h:'ハナハナ',p:'パルサー',s:'シェイク',b:'ハナビ'};
 const SMALL={j:[['grape','ブドウ'],['cherry','チェリー']],h:[['bell','ベル'],['suika','BIG中スイカ']]};
 const COL=['青','黄','緑','赤','虹'];
-const ROLE={free:'自由カウント',sb:'単独BIG（台BIGに加算）',cb:'チェリーBIG（台BIGに加算）',obig:'BIG（台BIGに加算）',sr:'単独REG（台REGに加算）',cr:'チェリーREG（台REGに加算）',oreg:'REG（台REGに加算）',grape:'ブドウ（推測に使用）',cherry:'チェリー（推測に使用）',bell:'ベル（推測に使用）',suika:'BIG中スイカ（推測に使用）'};
+const ROLE={free:'自由カウント',sb:'単独BIG（台BIGに加算）',cb:'チェリーBIG（台BIGに加算）',obig:'BIG（台BIGに加算）',sr:'単独REG（台REGに加算）',cr:'チェリーREG（台REGに加算）',oreg:'REG（台REGに加算）',grape:'ブドウ（推測に使用）',cherry:'チェリー（推測に使用）',bell:'ベル（推測に使用）',suika:'BIG中スイカ（推測に使用）',ten:'10枚役合算（推測に使用）',ch2:'チェリー合算（推測に使用）',suika2:'通常時スイカ（推測に使用）',furin:'風鈴（推測に使用）',hfA:'BIG中平行風鈴（推測に使用）',hfB:'BIG中斜め風鈴（推測に使用）',bara:'BIG中バラケ目（推測に使用）'};
 const CLR={rd:'赤',gn:'緑',gr:'薄緑',yl:'黄',bl:'青',wh:'白'};
 const CLS={rd:'bb',gn:'rb',gr:'gr',yl:'yl',bl:'bl',wh:''};
 const TPL={j:[{r:'sb',l:'単独BIG',c:'rd'},{r:'cb',l:'チェリーBIG',c:'rd'},{r:'sr',l:'単独REG',c:'gn'},{r:'cr',l:'チェリーREG',c:'gn'},{r:'grape',l:'ブドウ',c:'gr'},{r:'cherry',l:'チェリー（非重複）',c:'wh'}],h:[{r:'obig',l:'BIG',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'bell',l:'ベル',c:'gr'},{r:'suika',l:'BIG中スイカ',c:'wh'}]};
+TPL.p3=[{r:'obig',l:'BIG',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'ten',l:'10枚役',c:'gr'}];
+TPL.pbt=[{r:'obig',l:'BIG（初当り）',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'ch2',l:'チェリー',c:'gr'}];
+TPL.s=[{r:'obig',l:'BIG（初当り）',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'bell',l:'ベル',c:'gr'},{r:'cherry',l:'チェリー',c:'wh'},{r:'suika2',l:'スイカ',c:'yl'}];
+TPL.b=[{r:'obig',l:'BIG',c:'rd'},{r:'oreg',l:'REG',c:'gn'},{r:'furin',l:'風鈴',c:'gr'},{r:'hfA',l:'BIG中 平行風鈴',c:'wh'},{r:'hfB',l:'BIG中 斜め風鈴',c:'yl'},{r:'bara',l:'BIG中 バラケ目',c:'bl'}];
 const LINK={sb:'big',cb:'big',obig:'big',sr:'reg',cr:'reg',oreg:'reg'};
 const KEY='kachikachi-v1';
 const $=id=>document.getElementById(id);
@@ -239,15 +252,15 @@ const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){
 const S=()=>store.cur;
 const mdl=()=>AM().find(m=>m.id===S().model)||M[0];
 const mode=()=>store.mode||'auto';
-const curT=()=>{const md=mode();return md==='c'?'c':md==='j'||md==='h'?md:mdl().f};
-const items=()=>{const t=curT();if(t!=='c')return TPL[t].map(x=>Object.assign({id:x.r},x));store.items=store.items||TPL[mdl().f].map(x=>Object.assign({id:x.r},x));return store.items};
+const curT=()=>{const md=mode();return md==='c'?'c':md==='j'||md==='h'?md:tk(mdl())};
+const items=()=>{const t=curT();if(t!=='c')return TPL[t].map(x=>Object.assign({id:x.r},x));store.items=store.items||TPL[tk(mdl())].map(x=>Object.assign({id:x.r},x));return store.items};
 const lampOn=()=>curT()==='h'||(curT()==='c'&&!!store.lamp);
 const val=(s,it)=>it.r==='free'?((s.cnt||{})[it.id]||0):(s[it.r]||0);
 const push=()=>{undo.push(JSON.stringify(store.cur));if(undo.length>120)undo.shift()};
 const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1500)};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const ownG=()=>Math.max(0,(S().g||0)-(S().g0||0));
-const spec=m=>{const o=store.ov[m.id]||{};const pick=k=>{const a=o[k]!==undefined?o[k]:m[k];return a&&a.some(v=>v>0)?a:null};return{grape:pick('grape'),cherry:pick('cherry'),bell:pick('bell'),suika:pick('suika'),prior:o.prior||m.sets.map(()=>100/m.sets.length),gpb:o.gpb||24}};
+const spec=m=>{const o=store.ov[m.id]||{};const pick=(k,d)=>{const a=o[k]!==undefined?o[k]:d;return a&&a.some(v=>v>0)?a:null};const r={prior:o.prior||m.sets.map(()=>100/m.sets.length),gpb:o.gpb||24};for(const d of smalls(m))r[d.k]=pick(d.k,d.arr);return r};
 const ll=(k,n,den)=>{if(!(den>1))return 0;const p=1/den;n=Math.max(n,k);return k*Math.log(p)+(n-k)*Math.log(1-p)};
 function autoConf(s,m){if(!m.lamp||!m.lamp.regConf||!s.fr)return 0;let c=0;s.fr.forEach((v,i)=>{if(v>0)c=Math.max(c,i+1)});return Math.min(c,m.sets.length-1)}
 function lampText(s,m){const L=m.lamp;if(!L)return'';const sd=s.side,sw=L.swap&&store.swap30;const oddW=sw?sd[1]:sd[0],oddS=sw?sd[3]:sd[2],evW=sw?sd[0]:sd[1],evS=sw?sd[2]:sd[3];
@@ -265,7 +278,7 @@ const lp=m.sets.map((_,i)=>Math.log(Math.max(sp.prior[i]||0,1e-9)));
 if(s.g>0){for(let i=0;i<L;i++)lp[i]+=ll(s.big,s.g,m.big[i])+ll(s.reg,s.g,m.reg[i]);used.push('ボーナス')}
 if(m.sreg&&m.creg&&s.sr+s.cr>0){for(let i=0;i<L;i++){const a=1/m.sreg[i],b=1/m.creg[i];lp[i]+=s.sr*Math.log(a/(a+b))+s.cr*Math.log(b/(a+b))}used.push('REG内訳')}
 const og=ownG();
-for(const[k,lab]of SMALL[m.f]){const a=sp[k];if(!a||!s[k])continue;const n=k==='suika'?s.obig*sp.gpb:og;if(n<=0)continue;for(let i=0;i<L;i++)lp[i]+=ll(s[k],n,a[i]);used.push(lab)}
+for(const d of smalls(m)){const a=sp[d.k],k=s[d.k]||0;if(!a||(!k&&d.n!=='bigG'))continue;const n=nOf(s,d,sp);if(n<=0)continue;for(let i=0;i<L;i++)lp[i]+=ll(k,n,a[i]);used.push(d.l)}
 const ac=autoConf(s,m),cf=Math.max(s.conf,ac);
 for(let i=0;i<Math.min(cf,L);i++)lp[i]=-Infinity;
 if(cf)used.push((ac>=s.conf&&ac?'REG後'+m.lamp.fea+'で':'')+m.sets[Math.min(cf,L-1)]+(cf>=L-1?'確定':'以上確定'));
@@ -277,12 +290,12 @@ const pct=v=>(v*100).toFixed(v>=.995||v<.005?0:1)+'%';
 function render(){
 const s=S(),m=mdl(),sp=spec(m),{p,used}=calc(),L=m.sets.length;
 const all=AM();
-$('model').innerHTML=['j','h'].map(f=>`<optgroup label="${FAM[f]}">${all.filter(x=>x.f===f).map(x=>`<option value="${x.id}"${x.id===m.id?' selected':''}>${esc(x.n)}${x.custom?'（追加）':''}</option>`).join('')}</optgroup>`).join('');
+$('model').innerHTML=Object.keys(FAM).filter(f=>all.some(x=>x.f===f)).map(f=>`<optgroup label="${FAM[f]}">${all.filter(x=>x.f===f).map(x=>`<option value="${x.id}"${x.id===m.id?' selected':''}>${esc(x.n)}${x.custom?'（追加）':''}</option>`).join('')}</optgroup>`).join('');
 if(document.activeElement!==$('tag'))$('tag').value=s.tag||'';
 const top=p.indexOf(Math.max(...p));
 $('bars').style.gridTemplateColumns=`repeat(${L},minmax(0,1fr))`;
 $('bars').innerHTML=m.sets.map((n,i)=>`<div class="bar${i===top?' top':''}"><b class="num">${pct(p[i])}</b><i style="height:${Math.max(2,p[i]/Math.max(...p)*70)}%"></i><span>設定${n}</span></div>`).join('');
-const hiFrom=L>=6?3:3;const hi=p.slice(hiFrom).reduce((a,b)=>a+b,0);
+const hiFrom=L>=5?3:Math.max(1,L-2);const hi=p.slice(hiFrom).reduce((a,b)=>a+b,0);
 $('fTop').textContent='設定'+m.sets[top];$('fHiL').textContent=m.sets[hiFrom]+'以上';$('fHi').textContent=pct(hi);
 $('fRate').textContent=m.rate&&m.rate.length===L?(p.reduce((a,v,i)=>a+v*m.rate[i],0)).toFixed(1)+'%':'—';
 $('basis').textContent=(s.sample?'サンプル表示中　':'')+'自分の消化'+ownG()+'G　使用：'+(used.length?used.join('・'):'まだデータがありません');
@@ -299,7 +312,7 @@ $('lamps').innerHTML=lampOn()?chp('side',LM.side+'サイドランプ（白7ビ�
 const md=mode();
 $('modes').innerHTML=[['auto','機種に合わせる'],['j','ジャグ テンプレ'],['h','ハナハナ テンプレ'],['c','カスタム']].map(([k,l])=>`<button data-md="${k}" class="${md===k?'on':''}">${l}</button>`).join('');
 $('modes').style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
-$('modeNote').textContent=md==='c'?'ボタンの名前・役割・色・並び順を自由に変えられます（最大16個）。役割を「推測に使用」にした項目は設定推測に反映されます。':'テンプレ中は項目を変更できません。自分で決めたいときは「カスタム」を選んでください（今のテンプレが下書きとして入ります）。'+(md==='auto'?'　今は'+(mdl().f===J?'ジャグ':'ハナハナ')+'テンプレを使用中。':'');
+$('modeNote').textContent=md==='c'?'ボタンの名前・役割・色・並び順を自由に変えられます（最大16個）。役割を「推測に使用」にした項目は設定推測に反映されます。':'テンプレ中は項目を変更できません。自分で決めたいときは「カスタム」を選んでください（今のテンプレが下書きとして入ります）。'+(md==='auto'?'　今は'+FAM[mdl().f]+'テンプレを使用中。':'');
 if(md==='c'){const used=new Set(its.map(x=>x.r));
 $('itemEd').innerHTML=its.map((it,i)=>`<div class="it" data-row="${i}"><input value="${esc(it.l||'')}" data-f="l" aria-label="名前" placeholder="ボタン名"><button data-mv="-1" aria-label="上へ">↑</button><button data-mv="1" aria-label="下へ">↓</button><button data-del aria-label="削除">✕</button><div class="r2"><select data-f="r" aria-label="役割">${Object.entries(ROLE).map(([k,l])=>`<option value="${k}"${k===it.r?' selected':''}${k!=='free'&&k!==it.r&&used.has(k)?' disabled':''}>${l}</option>`).join('')}</select><select data-f="c" aria-label="色">${Object.entries(CLR).map(([k,l])=>`<option value="${k}"${k===it.c?' selected':''}>${l}</option>`).join('')}</select></div></div>`).join('')+
 `<div class="btnrow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button id="itAdd">＋項目を追加</button><button data-load="j">ジャグ テンプレを読込</button><button data-load="h">ハナハナ テンプレを読込</button></div><label class="chk"><input type="checkbox" id="lampChk"${store.lamp?' checked':''}>ランプ色カウント（サイド・フェザー）を使う</label>`}
@@ -307,17 +320,17 @@ else $('itemEd').innerHTML=`<div class="lbl">今のボタン</div><p>${its.map(x
 $('lampJ').innerHTML=lt&&lampOn()?'<h3>ランプ判別</h3>'+lt.map(([a,b])=>`<div><b>${a}</b><span>${esc(b)}</span></div>`).join(''):'';
 $('conf').innerHTML=m.sets.map((n,i)=>i===0?`<button data-c="0" class="${s.conf===0?'on':''}">なし</button>`:`<button data-c="${i}" class="${s.conf===i?'on':''}">${esc(n)}${i===L-1?'確定':'以上'}</button>`).join('');
 const og=ownG(),rows=[['BIG',s.big,s.g,m.big],['REG',s.reg,s.g,m.reg],['合算',s.big+s.reg,s.g,m.big.map((b,i)=>1/(1/b+1/m.reg[i]))]];
-if(m.f===J){if(m.sreg){rows.push(['単独REG（自分）',s.sr,og,m.sreg],['チェリーREG（自分）',s.cr,og,m.creg])}rows.push(['ブドウ',s.grape,og,sp.grape],['チェリー',s.cherry,og,sp.cherry])}
-else rows.push(['ベル',s.bell,og,sp.bell],['BIG中スイカ',s.suika,s.obig*sp.gpb,sp.suika]);
+if(m.sreg)rows.push(['単独REG（自分）',s.sr,og,m.sreg],['チェリーREG（自分）',s.cr,og,m.creg]);
+for(const d of smalls(m))rows.push([esc(d.l),s[d.k]||0,nOf(s,d,sp),sp[d.k]]);
 items().filter(it=>it.r==='free').forEach(it=>rows.push([esc(it.l||'無題'),val(s,it),og,null]));
 $('stat').innerHTML=`<thead><tr><th>項目</th><th>回数</th><th>実測</th>${m.sets.map(n=>`<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>`+rows.map(([lab,k,n,arr])=>{const h=near(k,n,arr);return`<tr><td>${lab}</td><td class="num">${k}</td><td class="num">${rate(k,n)}</td>${m.sets.map((_,i)=>`<td class="num${i===h?' hit':''}">${arr?'1/'+(+arr[i]).toFixed(arr[i]<20?2:1):'—'}</td>`).join('')}</tr>`}).join('')+'</tbody>';
 const ov=store.ov[m.id]||{};
-const er=(k,lab)=>`<tr><td>${lab}</td>${m.sets.map((_,i)=>{const a=ov[k]!==undefined?ov[k]:m[k];return`<td><input class="num" type="number" step="0.01" inputmode="decimal" data-e="${k}" data-i="${i}" value="${a&&a[i]?a[i]:''}" aria-label="${lab} 設定${m.sets[i]}"></td>`}).join('')}</tr>`;
+const er=(k,lab,def)=>`<tr><td>${esc(lab)}</td>${m.sets.map((_,i)=>{const a=ov[k]!==undefined?ov[k]:def;return`<td><input class="num" type="number" step="0.01" inputmode="decimal" data-e="${k}" data-i="${i}" value="${a&&a[i]?a[i]:''}" aria-label="${lab} 設定${m.sets[i]}"></td>`}).join('')}</tr>`;
 $('spec').innerHTML=`<thead><tr><th>項目（1/x）</th>${m.sets.map(n=>`<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>`+
 `<tr><td>BIG</td>${m.big.map(v=>`<td class="num">${v}</td>`).join('')}</tr><tr><td>REG</td>${m.reg.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`+
 (m.sreg?`<tr><td>単独REG</td>${m.sreg.map(v=>`<td class="num">${v}</td>`).join('')}</tr><tr><td>チェリーREG</td>${m.creg.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`:'')+
 (m.rate?`<tr><td>機械割%</td>${m.rate.map(v=>`<td class="num">${v}</td>`).join('')}</tr>`:'')+
-SMALL[m.f].map(([k,lab])=>er(k,lab)).join('')+
+smalls(m).map(d=>er(d.k,d.l,d.arr)).join('')+
 `<tr><td>事前配分%</td>${m.sets.map((_,i)=>`<td><input class="num" type="number" inputmode="decimal" data-e="prior" data-i="${i}" value="${+sp.prior[i].toFixed(1)}" aria-label="事前配分 設定${m.sets[i]}"></td>`).join('')}</tr></tbody>`;
 $('delModel').hidden=!m.custom;
 $('specNote').textContent=(m.note?m.note+'。':'')+(m.f===H?'ハナハナの小役は設定別数値が公表されていないため空欄。分かる数値を入れると推測に加わります。BIG中スイカは「BIG中1Gあたり」、BIG1回='+sp.gpb+'Gで換算。':'空欄にした小役は推測に使いません。')+' 事前配分はホールの設定配分の想定（初期値は均等）。';
@@ -333,8 +346,8 @@ persist()}
 const ch=f=>{push();f();S().sample=false;render()};
 let lastT=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastT<350&&!e.target.closest('input,select,textarea,label')){e.preventDefault();const b=e.target.closest('button');if(b)b.click()}lastT=n},{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault());
-$('pad').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;const it=items().find(x=>x.id===b.dataset.id);if(!it)return;const d=minus?-1:1;ch(()=>{const s=S();s.cnt=s.cnt||{};if(it.r==='free'){const v=(s.cnt[it.id]||0)+d;if(v<0)return;s.cnt[it.id]=v;return}if(s[it.r]+d<0)return;s[it.r]+=d;const link=LINK[it.r];if(link)s[link]=Math.max(0,s[link]+d)});try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}});
-$('modes').addEventListener('click',e=>{const b=e.target.closest('[data-md]');if(!b)return;const k=b.dataset.md;if(k==='c'&&mode()!=='c'){const t=curT();store.items=TPL[t==='c'?mdl().f:t].map(x=>Object.assign({id:x.r},x));store.lamp=t==='h'}store.mode=k;render();toast(k==='c'?'カスタムモード':'テンプレを切り替えました')});
+$('pad').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;const it=items().find(x=>x.id===b.dataset.id);if(!it)return;const d=minus?-1:1;ch(()=>{const s=S();s.cnt=s.cnt||{};if(it.r==='free'){const v=(s.cnt[it.id]||0)+d;if(v<0)return;s.cnt[it.id]=v;return}if((s[it.r]||0)+d<0)return;s[it.r]=(s[it.r]||0)+d;const link=LINK[it.r];if(link)s[link]=Math.max(0,s[link]+d)});try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}});
+$('modes').addEventListener('click',e=>{const b=e.target.closest('[data-md]');if(!b)return;const k=b.dataset.md;if(k==='c'&&mode()!=='c'){const t=curT();store.items=TPL[t==='c'?tk(mdl()):t].map(x=>Object.assign({id:x.r},x));store.lamp=t==='h'}store.mode=k;render();toast(k==='c'?'カスタムモード':'テンプレを切り替えました')});
 $('itemEd').addEventListener('change',e=>{const t=e.target;if(t.id==='lampChk'){store.lamp=t.checked;render();return}const row=t.closest('[data-row]');if(!row||!t.dataset.f)return;const it=store.items[+row.dataset.row];if(t.dataset.f==='r'){const old=it.r;it.r=t.value;if(t.value!=='free'){it.id=t.value}else if(old!=='free'){it.id='f'+Date.now()}if(!it.l||it.l===(ROLE[old]||'').replace(/（.*/,''))it.l=ROLE[t.value].replace(/（.*/,'')}else it[t.dataset.f]=t.value;render()});
 $('itemEd').addEventListener('click',e=>{const t=e.target;if(t.id==='itAdd'){if(store.items.length>=16)return toast('16個までです');store.items.push({id:'f'+Date.now(),r:'free',l:'項目'+(store.items.length+1),c:'wh'});render();return}const ld=t.closest('[data-load]');if(ld){store.items=TPL[ld.dataset.load].map(x=>Object.assign({id:x.r},x));store.lamp=ld.dataset.load==='h';render();toast('テンプレを読み込みました');return}const row=t.closest('[data-row]');if(!row)return;const i=+row.dataset.row,a=store.items;if(t.closest('[data-del]')){a.splice(i,1);render();return}const mv=t.closest('[data-mv]');if(mv){const j=i+(+mv.dataset.mv);if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()}});
 $('lamps').addEventListener('change',e=>{if(e.target.id==='swap30'){store.swap30=e.target.checked;render()}});
