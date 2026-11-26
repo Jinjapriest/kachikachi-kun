@@ -98,6 +98,8 @@ button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .judge div{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:8px;padding:4px 0}
 .judge b{font-size:13px;color:var(--sub)}
 .dmm{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;padding:8px 12px;margin-bottom:10px;border-radius:12px;background:color-mix(in srgb,var(--red) 10%,var(--bg));border:1px solid color-mix(in srgb,var(--red) 35%,var(--bg));color:var(--ink);text-decoration:none;font-weight:700;font-size:15px}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.links .dmm{margin:0;flex-direction:column;align-items:flex-start;justify-content:center;gap:0}
 .dmm small{color:var(--sub);font-weight:500;font-size:13px}
 .lbl{font-size:14px;font-weight:700;color:var(--sub)}
 h3{font-size:16px;margin:4px 0 6px}
@@ -152,14 +154,14 @@ td.hit{background:color-mix(in srgb,var(--yel) 40%,transparent);font-weight:700}
 <div class="view act" id="v-count"><div class="pad" id="pad"></div></div>
 <div class="view sc" id="v-lamp"><div class="chipbox" id="lamps"></div></div>
 <div class="view sc" id="v-stat">
-<a class="dmm" id="dmm1" target="_blank" rel="noopener"></a>
+<div class="links"><a class="dmm" id="dmm1" target="_blank" rel="noopener"></a><a class="dmm" id="igk1" target="_blank" rel="noopener"></a></div>
 <h3>確定演出で絞り込み</h3><div class="cf" id="conf"></div>
 <h3>実測と設定差</h3><div class="scroll"><table id="stat"></table></div>
 <div class="judge" id="lampJ"></div>
 <p class="muted" id="ownG"></p>
 </div>
 <div class="view sc" id="v-spec">
-<a class="dmm" id="dmm2" target="_blank" rel="noopener"></a>
+<div class="links"><a class="dmm" id="dmm2" target="_blank" rel="noopener"></a><a class="dmm" id="igk2" target="_blank" rel="noopener"></a></div>
 <p class="muted" id="specNote" style="margin-top:0"></p>
 <div class="scroll"><table class="ed" id="spec"></table></div>
 <p><button id="specReset">この機種の数値を初期値に戻す</button> <button id="delModel" hidden>この追加機種を削除</button></p>
@@ -228,6 +230,8 @@ M.push(
 );
 const DMM={myj5:4029,neoaim:4801,girls:4540,gogo3:4375,happy8:4230,king30:4311,nkv:4912,houou:4014,dragon:4453,shake:4893,hanabi:4928,pulbt:4791,pulsp3:3841};
 const dmmUrl=m=>DMM[m.id]?'https://p-town.dmm.com/machines/'+DMM[m.id]:'https://www.google.com/search?q='+encodeURIComponent('site:p-town.dmm.com '+m.n);
+const IGK={houou:'s_hanahana_houoh_tensho',king30:'s_kinghanahana2023',dragon:'s_drahana_senko30',nkv:'l_new_king_hanahana_v',pulsp3:'s_newpulsar_sp3'};
+const igkUrl=m=>IGK[m.id]?'https://1geki.jp/slot/'+IGK[m.id]+'/':'https://www.google.com/search?q='+encodeURIComponent('site:1geki.jp '+m.n);
 M.forEach(m=>{m.sets=m.sets||S6});
 const tk=m=>m.tpl||m.f;
 const smalls=m=>m.small||(SMALL[m.f]||[]).map(([k,l])=>({k,l,arr:m[k],n:k==='suika'?'gpb':'own'}));
@@ -339,7 +343,8 @@ $('spec').innerHTML=`<thead><tr><th>項目（1/x）</th>${m.sets.map(n=>`<th>${e
 smalls(m).map(d=>er(d.k,d.l,d.arr)).join('')+
 `<tr><td>事前配分%</td>${m.sets.map((_,i)=>`<td><input class="num" type="number" inputmode="decimal" data-e="prior" data-i="${i}" value="${+sp.prior[i].toFixed(1)}" aria-label="事前配分 設定${m.sets[i]}"></td>`).join('')}</tr></tbody>`;
 $('delModel').hidden=!m.custom;
-for(const id of['dmm1','dmm2']){const a=$(id);a.href=dmmUrl(m);a.innerHTML=`<span>${esc(m.n)}の機種解説</span><small>${DMM[m.id]?'DMMぱちタウン ↗':'ぱちタウンで検索 ↗'}</small>`}
+for(const id of['dmm1','dmm2']){const a=$(id);a.href=dmmUrl(m);a.innerHTML=`<span>DMMぱちタウン ↗</span><small>${DMM[m.id]?'機種解説':'サイト内を検索'}</small>`}
+for(const id of['igk1','igk2']){const a=$(id);a.href=igkUrl(m);a.innerHTML=`<span>一撃 ↗</span><small>${IGK[m.id]?'設定判別':'サイト内を検索'}</small>`}
 $('specNote').textContent=(m.note?m.note+'。':'')+(m.f===H?'ハナハナの小役は設定別数値が公表されていないため空欄。分かる数値を入れると推測に加わります。BIG中スイカは「BIG中1Gあたり」、BIG1回='+sp.gpb+'Gで換算。':'空欄にした小役は推測に使いません。')+' 事前配分はホールの設定配分の想定（初期値は均等）。';
 $('hist').innerHTML=store.hist.length?store.hist.map((h,i)=>{const hm=all.find(x=>x.id===h.s.model)||M[0];return`<li><span><b>${esc(h.s.tag||'台番号なし')}</b> ${esc(hm.n)}<br><small class="num">${new Date(h.t).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}　${h.s.g}G　BIG${h.s.big} REG${h.s.reg}</small></span><span><button data-h="${i}">開く</button> <button data-d="${i}">削除</button></span></li>`}).join(''):'<li class="muted">まだありません。「記録に保存」で台ごとに残せます。</li>';
 if(!lampOn()&&view==='lamp')view='count';
